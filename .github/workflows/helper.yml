@@ -1,0 +1,48 @@
+name: Helper
+
+# Builds the Rust keyboard helper for Windows (x64) and macOS (universal) and attaches both to the run.
+on:
+  push:
+    branches: [main]
+    paths: ["native/**", ".github/workflows/helper.yml"]
+  pull_request:
+    paths: ["native/**", ".github/workflows/helper.yml"]
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo build --release --manifest-path native/Cargo.toml
+      # Injects Right Shift + F24 and checks it was taken and swallowed. Hosted runners may not
+      # deliver injected keys to a hook, so a failure here is a hint, not a blocker.
+      - run: native/target/release/keybridge-helper.exe --selftest
+        continue-on-error: true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: keybridge-helper-windows-x64
+          path: native/target/release/keybridge-helper.exe
+          if-no-files-found: error
+
+  mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+      # One binary for Apple Silicon and Intel, signed ad hoc. The self-test needs the Accessibility
+      # permission, which a hosted runner can't grant, so it runs on the real Mac only.
+      - run: |
+          cargo build --release --manifest-path native/Cargo.toml --target aarch64-apple-darwin
+          cargo build --release --manifest-path native/Cargo.toml --target x86_64-apple-darwin
+          mkdir -p native/target/universal
+          lipo -create -output native/target/universal/keybridge-helper \
+            native/target/aarch64-apple-darwin/release/keybridge-helper \
+            native/target/x86_64-apple-darwin/release/keybridge-helper
+          codesign --force --sign - native/target/universal/keybridge-helper
+          lipo -info native/target/universal/keybridge-helper
+      - uses: actions/upload-artifact@v4
+        with:
+          name: keybridge-helper-macos-universal
+          path: native/target/universal/keybridge-helper
+          if-no-files-found: error

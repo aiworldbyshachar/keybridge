@@ -1,18 +1,24 @@
 // M1 keyboard spike: starts the Rust helper and wires a few demo shortcuts, the way the app will.
-// Open Notepad and try them. Left Shift + the same letter stays a plain capital letter.
+// Open Notepad or TextEdit and try them. Left Shift + the same letter stays a plain capital letter.
 // Nothing here sees or logs your typing - the helper only reports which shortcut fired.
 //
 //   cargo build --release --manifest-path native/Cargo.toml
 //   node dev/spike.js
 //
 // The letters are ones the current Clavier+ setup doesn't use on either side, so both can run.
+// On the Mac the first run asks for the Accessibility permission (for the app you run this from).
 
 const { spawn } = require('child_process');
 const path = require('path');
 const readline = require('readline');
 
+const mac = process.platform === 'darwin';
 const exe = path.join(__dirname, '..', 'native', 'target', 'release',
   process.platform === 'win32' ? 'keybridge-helper.exe' : 'keybridge-helper');
+
+const RIGHT_CTRL = mac ? 'Right Control + 1' : 'Right Ctrl + 1';
+const RIGHT_ALT = mac ? 'Right Option + Q' : 'Right Alt + Q';
+const RIGHT_META = mac ? 'Right Cmd + 1' : 'Right Win + 1';
 
 const SHORTCUTS = [
   { id: 'address', label: 'Right Shift + D', mods: ['ShiftRight'], key: 'KeyD',
@@ -21,10 +27,12 @@ const SHORTCUTS = [
     action: 'type', text: 'שלום! הטקסט הזה הוקלד על ידי KeyBridge' },
   { id: 'signature', label: 'Right Shift + T', mods: ['ShiftRight'], key: 'KeyT',
     action: 'paste', text: 'Best regards,\nShachar\nAI World by Shachar - small tools for everyday work' },
-  { id: 'right-ctrl', label: 'Right Ctrl + 1', mods: ['ControlRight'], key: 'Digit1',
-    action: 'type', text: 'Right Ctrl + 1 works, Left Ctrl + 1 is untouched' },
-  { id: 'right-alt', label: 'Right Alt + Q', mods: ['AltRight'], key: 'KeyQ',
-    action: 'type', text: 'Right Alt + Q works' },
+  { id: 'right-ctrl', label: RIGHT_CTRL, mods: ['ControlRight'], key: 'Digit1',
+    action: 'type', text: `${RIGHT_CTRL} works` },
+  { id: 'right-alt', label: RIGHT_ALT, mods: ['AltRight'], key: 'KeyQ',
+    action: 'type', text: `${RIGHT_ALT} works` },
+  { id: 'right-meta', label: RIGHT_META, mods: ['MetaRight'], key: 'Digit1',
+    action: 'type', text: `${RIGHT_META} works` },
 ];
 
 const helper = spawn(exe, [], { stdio: ['pipe', 'pipe', 'inherit'] });
@@ -52,7 +60,11 @@ readline.createInterface({ input: helper.stdout }).on('line', (line) => {
     for (const s of SHORTCUTS) console.log(`  ${s.label.padEnd(16)} ${s.action === 'paste' ? 'pastes' : 'types'} "${s.text.split('\n')[0]}"`);
     console.log('\nPress P + Enter here to pause or resume, Q + Enter to quit.\n');
   } else if (ev.event === 'layout') {
-    console.log(`keyboard layout in front: ${ev.locale} (${ev.langId})`);
+    console.log(`keyboard layout in front: ${ev.locale} (${ev.langId || ev.source})`);
+  } else if (ev.event === 'permission') {
+    console.log(ev.accessibility
+      ? 'Accessibility allowed - shortcuts are on.'
+      : 'Allow this app in System Settings > Privacy & Security > Accessibility, then come back.');
   } else if (ev.event === 'hotkey') {
     const s = SHORTCUTS.find((x) => x.id === ev.id);
     if (!s) return;

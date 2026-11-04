@@ -15,6 +15,8 @@ use windows_sys::Win32::System::Memory::*;
 use windows_sys::Win32::UI::Input::KeyboardAndMouse::*;
 use windows_sys::Win32::UI::WindowsAndMessaging::*;
 
+pub const NAME: &str = "windows";
+
 /// dwExtraInfo on everything we inject, so our own hook lets it pass untouched.
 const OUR_INPUT: usize = 0x4B42_5247;
 /// dwExtraInfo the self-test uses: the hook treats it like a real key press.
@@ -43,6 +45,8 @@ static CLIP_WINDOW: AtomicUsize = AtomicUsize::new(0);
 /// Counts only (never which keys) - used by the self-test.
 static FIRED: AtomicU32 = AtomicU32::new(0);
 static SWALLOW_COUNT: AtomicU32 = AtomicU32::new(0);
+
+const ALT_OR_META: u32 = ALT_LEFT | ALT_RIGHT | META_LEFT | META_RIGHT;
 
 /// (bit, virtual key, scan code, extended) for each modifier.
 const MOD_KEYS: [(u32, u16, u16, bool); 8] = [

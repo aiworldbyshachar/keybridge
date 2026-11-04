@@ -10,8 +10,6 @@ pub const ALT_RIGHT: u32 = 1 << 5;
 pub const META_LEFT: u32 = 1 << 6;
 pub const META_RIGHT: u32 = 1 << 7;
 
-pub const ALT_OR_META: u32 = ALT_LEFT | ALT_RIGHT | META_LEFT | META_RIGHT;
-
 const NAMES: [(&str, u32); 8] = [
     ("ShiftLeft", SHIFT_LEFT),
     ("ShiftRight", SHIFT_RIGHT),
