@@ -17,6 +17,9 @@
     "start": "electron .",
     "icons": "node scripts/make-icons.js",
     "test": "node --test test/",
+    "helper": "cargo build --release --manifest-path native/Cargo.toml",
+    "selftest": "native/target/release/keybridge-helper --selftest",
+    "spike": "node dev/spike.js",
     "dist:win": "electron-builder --win",
     "dist:mac": "electron-builder --mac"
   },

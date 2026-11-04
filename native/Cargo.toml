@@ -1,0 +1,25 @@
+[package]
+name = "keybridge-helper"
+version = "0.1.0"
+edition = "2021"
+description = "KeyBridge keyboard helper: hotkeys with left/right modifiers, typing and pasting text"
+license = "MIT"
+publish = false
+
+[dependencies]
+serde_json = "1"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = [
+  "Win32_Foundation",
+  "Win32_Globalization",
+  "Win32_System_DataExchange",
+  "Win32_System_LibraryLoader",
+  "Win32_System_Memory",
+  "Win32_UI_Input_KeyboardAndMouse",
+  "Win32_UI_WindowsAndMessaging",
+] }
+
+[profile.release]
+lto = true
+strip = true
