@@ -1,0 +1,8 @@
+* text=auto
+*.sh text eol=lf
+*.png binary
+*.jpg binary
+*.mp3 binary
+*.mp4 binary
+# Clavier+ settings are UTF-16 with CRLF - keep the bytes as they are
+*.ini binary

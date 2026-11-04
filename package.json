@@ -1,0 +1,78 @@
+{
+  "name": "keybridge",
+  "productName": "KeyBridge",
+  "version": "0.1.0",
+  "description": "Text shortcuts and hotkeys with left and right modifier keys, on every computer you sign in to",
+  "main": "src/main/main.js",
+  "author": "aiworldbyshachar",
+  "homepage": "https://aiworldbyshachar.github.io/keybridge/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aiworldbyshachar/keybridge.git"
+  },
+  "bugs": "https://github.com/aiworldbyshachar/keybridge/issues",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "icons": "node scripts/make-icons.js",
+    "test": "node --test test/",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac"
+  },
+  "devDependencies": {
+    "electron": "43.7.11",
+    "electron-builder": "26.17.0"
+  },
+  "build": {
+    "appId": "com.keybridge.app",
+    "productName": "KeyBridge",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "KeyBridge-Windows-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "KeyBridge",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "category": "public.app-category.utilities",
+      "artifactName": "KeyBridge-macOS.${ext}",
+      "extendInfo": {
+        "LSAppNapIsDisabled": true
+      }
+    },
+    "dmg": {
+      "title": "KeyBridge"
+    }
+  }
+}
