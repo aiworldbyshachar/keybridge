@@ -34,6 +34,11 @@ const SHORTCUTS = [
   { id: 'right-meta', label: RIGHT_META, mods: ['MetaRight'], key: 'Digit1',
     action: 'type', text: `${RIGHT_META} works` },
 ];
+// Typed ";kb" then Space: replaced, on the English or the Hebrew layout alike.
+const ABBREVS = [
+  { id: 'abbrev', label: ';kb + Space', keys: ['Semicolon', 'KeyK', 'KeyB'], word: false,
+    action: 'type', text: 'KeyBridge abbreviations work' },
+];
 
 const helper = spawn(exe, [], { stdio: ['pipe', 'pipe', 'inherit'] });
 const send = (cmd) => helper.stdin.write(JSON.stringify(cmd) + '\n');
@@ -54,11 +59,17 @@ readline.createInterface({ input: helper.stdout }).on('line', (line) => {
   if (ev.event === 'ready') {
     console.log(`helper ${ev.version} ready on ${ev.platform}`);
     send({ cmd: 'setHotkeys', hotkeys: SHORTCUTS.map(({ id, mods, key }) => ({ id, mods, key })) });
+    send({ cmd: 'setAbbrevs', abbrevs: ABBREVS.map(({ id, keys, word }) => ({ id, keys, word })) });
     send({ cmd: 'layout' });
-  } else if (ev.event === 'hotkeysSet') {
+  } else if (ev.event === 'abbrevsSet') {
     console.log(`\n${ev.count} shortcuts on${ev.skipped.length ? ` (skipped: ${ev.skipped.join(', ')})` : ''}:`);
-    for (const s of SHORTCUTS) console.log(`  ${s.label.padEnd(16)} ${s.action === 'paste' ? 'pastes' : 'types'} "${s.text.split('\n')[0]}"`);
+    for (const s of [...SHORTCUTS, ...ABBREVS]) console.log(`  ${s.label.padEnd(16)} ${s.action === 'paste' ? 'pastes' : 'types'} "${s.text.split('\n')[0]}"`);
     console.log('\nPress P + Enter here to pause or resume, Q + Enter to quit.\n');
+  } else if (ev.event === 'abbrev') {
+    const s = ABBREVS.find((x) => x.id === ev.id);
+    if (!s) return;
+    console.log(`fired: ${s.label}`);
+    send({ cmd: 'type', text: s.text + (ev.end === 'space' ? ' ' : ''), erase: ev.erase });
   } else if (ev.event === 'layout') {
     console.log(`keyboard layout in front: ${ev.locale} (${ev.langId || ev.source})`);
   } else if (ev.event === 'permission') {

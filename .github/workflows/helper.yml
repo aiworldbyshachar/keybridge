@@ -14,9 +14,11 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - run: cargo test --manifest-path native/Cargo.toml
       - run: cargo build --release --manifest-path native/Cargo.toml
-      # Injects Right Shift + F24 and checks it was taken and swallowed. Hosted runners may not
-      # deliver injected keys to a hook, so a failure here is a hint, not a blocker.
+      # Injects Right Shift + F24 and ";q" + Space and checks the hotkey and the abbreviation were
+      # taken and swallowed. Hosted runners may not deliver injected keys to a hook, so a failure
+      # here is a hint, not a blocker.
       - run: native/target/release/keybridge-helper.exe --selftest
         continue-on-error: true
       - uses: actions/upload-artifact@v4

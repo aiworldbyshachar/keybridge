@@ -16,10 +16,11 @@
   "scripts": {
     "start": "electron .",
     "icons": "node scripts/make-icons.js",
-    "test": "node --test test/",
+    "test": "node --test test/*.test.js",
     "helper": "cargo build --release --manifest-path native/Cargo.toml",
     "selftest": "native/target/release/keybridge-helper --selftest",
     "spike": "node dev/spike.js",
+    "demo": "node dev/cli.js",
     "dist:win": "electron-builder --win",
     "dist:mac": "electron-builder --mac"
   },

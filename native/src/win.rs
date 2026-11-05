@@ -1,12 +1,13 @@
 //! Windows: a low-level keyboard hook (WH_KEYBOARD_LL) that sees left and right modifiers as
 //! different keys, SendInput for typing, and the clipboard for pasting.
 
+use crate::abbrev::{Abbrev, Matcher, Stroke};
 use crate::keys::*;
 use serde_json::{json, Value};
 use std::ptr::{null, null_mut};
 use std::sync::atomic::{AtomicBool, AtomicU32, AtomicUsize, Ordering::SeqCst};
 use std::sync::{mpsc, Mutex, OnceLock};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use windows_sys::Win32::Foundation::*;
 use windows_sys::Win32::Globalization::LCIDToLocaleName;
 use windows_sys::Win32::System::DataExchange::*;
@@ -34,6 +35,9 @@ const CLIPBOARD_MARKERS: [&str; 4] = [
 const PASTE_SETTLE: Duration = Duration::from_millis(400);
 
 static HOTKEYS: Mutex<Vec<Hotkey>> = Mutex::new(Vec::new());
+static ABBREVS: Mutex<Matcher> = Mutex::new(Matcher::new());
+/// The window keys last went to: typing in another window starts the abbreviation buffer over.
+static LAST_WINDOW: AtomicUsize = AtomicUsize::new(0);
 /// Modifiers physically held, from the hook (our own injected keys don't count).
 static MODS: AtomicU32 = AtomicU32::new(0);
 static PAUSED: AtomicBool = AtomicBool::new(false);
@@ -92,12 +96,27 @@ pub fn key_code(name: &str) -> Option<u32> {
     SCAN_CODES.iter().find(|(n, _)| *n == name).map(|(_, sc)| *sc)
 }
 
+fn key_name(code: u32) -> Option<&'static str> {
+    SCAN_CODES.iter().find(|(_, sc)| *sc == code).map(|(n, _)| *n)
+}
+
 pub fn set_hotkeys(list: Vec<Hotkey>) {
     *HOTKEYS.lock().unwrap() = list;
 }
 
+pub fn set_abbrevs(list: Vec<Abbrev>) {
+    ABBREVS.lock().unwrap().set(list);
+}
+
 pub fn set_paused(paused: bool) {
     PAUSED.store(paused, SeqCst);
+    ABBREVS.lock().unwrap().reset();
+}
+
+fn emit(event: Value) {
+    if let Some(events) = EVENTS.get() {
+        let _ = events.send(event.to_string());
+    }
 }
 
 /// Installs the hook on its own thread (it needs a message loop) and waits until it's in place.
@@ -127,9 +146,16 @@ pub fn start(events: mpsc::Sender<String>) -> Result<(), String> {
 unsafe extern "system" fn hook_proc(code: i32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
     if code == HC_ACTION as i32 {
         let ev = &*(lparam as *const KBDLLHOOKSTRUCT);
-        if ev.dwExtraInfo != OUR_INPUT && on_key(ev, wparam as u32) {
-            SWALLOW_COUNT.fetch_add(1, SeqCst);
-            return 1;
+        if ev.dwExtraInfo != OUR_INPUT {
+            if on_key(ev, wparam as u32) {
+                SWALLOW_COUNT.fetch_add(1, SeqCst);
+                return 1;
+            }
+            // The self-test's keys never reach the window in front. Its modifiers must, or
+            // GetAsyncKeyState wouldn't see them held.
+            if ev.dwExtraInfo == SELFTEST_INPUT && modifier_bit_of(ev).is_none() {
+                return 1;
+            }
         }
     }
     CallNextHookEx(null_mut(), code, wparam, lparam)
@@ -166,12 +192,36 @@ fn on_key(ev: &KBDLLHOOKSTRUCT, msg: u32) -> bool {
         let hotkeys = HOTKEYS.lock().unwrap();
         hotkeys.iter().find(|h| h.key == key as u32 && h.mods == mods).map(|h| h.id.clone())
     };
-    let Some(id) = id else { return false };
-    SWALLOWED[key].store(true, SeqCst);
-    FIRED.fetch_add(1, SeqCst);
-    if let Some(events) = EVENTS.get() {
-        let _ = events.send(json!({"event": "hotkey", "id": id}).to_string());
+    if let Some(id) = id {
+        SWALLOWED[key].store(true, SeqCst);
+        FIRED.fetch_add(1, SeqCst);
+        ABBREVS.lock().unwrap().reset();
+        emit(json!({"event": "hotkey", "id": id}));
+        return true;
     }
+    // Keys other tools inject (another text expander, remote control) aren't the user typing.
+    if ev.flags & LLKHF_INJECTED != 0 && ev.dwExtraInfo != SELFTEST_INPUT {
+        return false;
+    }
+    abbrev_key(key, mods)
+}
+
+/// Feeds the abbreviation buffer. Returns true to swallow the key: the Space or Tab that fired one.
+fn abbrev_key(key: usize, mods: u32) -> bool {
+    let mut matcher = ABBREVS.lock().unwrap();
+    if mods & !(SHIFT_LEFT | SHIFT_RIGHT) != 0 {
+        matcher.reset(); // a Ctrl / Alt / Win combination, not typing
+        return false;
+    }
+    let window = unsafe { GetForegroundWindow() } as usize;
+    if LAST_WINDOW.swap(window, SeqCst) != window {
+        matcher.reset();
+    }
+    let class = key_name(key as u32).map(key_class).unwrap_or(KeyClass::Other);
+    let stroke = Stroke { key: key as u32, shift: mods & (SHIFT_LEFT | SHIFT_RIGHT) != 0 };
+    let Some(fired) = matcher.press(stroke, class) else { return false };
+    SWALLOWED[key].store(true, SeqCst);
+    emit(json!({"event": "abbrev", "id": fired.id, "erase": fired.erase, "end": fired.end}));
     true
 }
 
@@ -231,6 +281,21 @@ fn tap(inputs: &mut Vec<INPUT>, vk: u16, scan: u16) {
     inputs.push(key_input(vk, scan, KEYEVENTF_KEYUP));
 }
 
+/// Backspaces for what an abbreviation left behind.
+fn erase_keys(inputs: &mut Vec<INPUT>, erase: usize) {
+    for _ in 0..erase {
+        tap(inputs, VK_BACK, 0x0E);
+    }
+}
+
+/// Left arrows that put the caret where {cursor} was.
+fn left_keys(inputs: &mut Vec<INPUT>, left: usize) {
+    for _ in 0..left {
+        inputs.push(key_input(VK_LEFT, 0x4B, KEYEVENTF_EXTENDEDKEY));
+        inputs.push(key_input(VK_LEFT, 0x4B, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP));
+    }
+}
+
 fn send(inputs: &[INPUT]) -> bool {
     let sent = unsafe { SendInput(inputs.len() as u32, inputs.as_ptr(), std::mem::size_of::<INPUT>() as i32) };
     sent as usize == inputs.len()
@@ -270,8 +335,10 @@ fn send_without_modifiers(body: &[INPUT]) -> bool {
 
 const BLOCKED: &str = "Windows blocked the keys (the app in front may run as administrator)";
 
-pub fn type_text(text: &str) -> Result<(), String> {
+pub fn type_text(text: &str, erase: usize, left: usize) -> Result<(), String> {
+    ABBREVS.lock().unwrap().reset();
     let mut body = Vec::new();
+    erase_keys(&mut body, erase);
     for ch in text.chars() {
         match ch {
             '\r' => {}
@@ -286,20 +353,25 @@ pub fn type_text(text: &str) -> Result<(), String> {
             }
         }
     }
+    left_keys(&mut body, left);
     if send_without_modifiers(&body) { Ok(()) } else { Err(BLOCKED.into()) }
 }
 
-pub fn paste_text(text: &str) -> Result<(), String> {
+pub fn paste_text(text: &str, erase: usize, left: usize) -> Result<(), String> {
+    ABBREVS.lock().unwrap().reset();
     let saved = clipboard::save()?;
     let mut utf16: Vec<u16> = text.encode_utf16().collect();
     utf16.push(0);
     let bytes: Vec<u8> = utf16.iter().flat_map(|u| u.to_le_bytes()).collect();
     clipboard::write(&[(CF_UNICODETEXT, bytes)])?;
 
-    let mut ctrl_v = vec![key_input(VK_LCONTROL, 0x1D, 0)];
-    tap(&mut ctrl_v, 0x56, 0x2F);
-    ctrl_v.push(key_input(VK_LCONTROL, 0x1D, KEYEVENTF_KEYUP));
-    let sent = send_without_modifiers(&ctrl_v);
+    let mut keys = Vec::new();
+    erase_keys(&mut keys, erase);
+    keys.push(key_input(VK_LCONTROL, 0x1D, 0));
+    tap(&mut keys, 0x56, 0x2F);
+    keys.push(key_input(VK_LCONTROL, 0x1D, KEYEVENTF_KEYUP));
+    left_keys(&mut keys, left);
+    let sent = send_without_modifiers(&keys);
 
     std::thread::sleep(PASTE_SETTLE);
     clipboard::write(&saved)?;
@@ -414,7 +486,9 @@ fn wide(s: &str) -> Vec<u16> {
 }
 
 /// Injects Right Shift + F24 (a key no app reacts to) and Left Shift + F24 with a hotkey on
-/// Right Shift + F24, and checks the first was taken and swallowed and the second passed.
+/// Right Shift + F24, and checks the first was taken and swallowed and the second passed. Then
+/// types ";q" + Space with an abbreviation on ";q" and checks it fired and the Space was taken.
+/// None of these keys reach the window in front.
 pub fn selftest() -> i32 {
     let (events, received) = mpsc::channel();
     if let Err(e) = start(events) {
@@ -423,6 +497,9 @@ pub fn selftest() -> i32 {
     }
     let f24 = key_code("F24").unwrap();
     set_hotkeys(vec![Hotkey { id: "selftest".into(), mods: SHIFT_RIGHT, key: f24 }]);
+    let (semicolon, q, space) = (key_code("Semicolon").unwrap(), key_code("KeyQ").unwrap(), key_code("Space").unwrap());
+    let stroke = |key| Stroke { key, shift: false };
+    set_abbrevs(vec![Abbrev { id: "selftest".into(), keys: vec![stroke(semicolon), stroke(q)], word: false }]);
 
     let fake = |vk: u16, scan: u16, flags: u32| {
         let mut input = key_input(vk, scan, flags);
@@ -438,16 +515,32 @@ pub fn selftest() -> i32 {
             fake(shift_vk, shift_scan, KEYEVENTF_KEYUP),
         ])
     };
-    let sent = press(0xA1, 0x36) && press(0xA0, 0x2A);
-    let event = received.recv_timeout(Duration::from_secs(2)).ok();
+    let type_key = |vk: u16, scan: u32| send(&[fake(vk, scan as u16, 0), fake(vk, scan as u16, KEYEVENTF_KEYUP)]);
+    let sent = press(0xA1, 0x36)
+        && press(0xA0, 0x2A)
+        && type_key(VK_OEM_1, semicolon)
+        && type_key(0x51, q)
+        && type_key(VK_SPACE, space);
+
+    let mut got = Vec::new();
+    let deadline = Instant::now() + Duration::from_secs(2);
+    while got.len() < 2 {
+        match received.recv_timeout(deadline.saturating_duration_since(Instant::now())) {
+            Ok(event) => got.push(event),
+            Err(_) => break,
+        }
+    }
     std::thread::sleep(Duration::from_millis(300));
 
     let fired = FIRED.load(SeqCst);
     let swallowed = SWALLOW_COUNT.load(SeqCst);
-    let ok = sent && fired == 1 && swallowed == 2 && event.as_deref().is_some_and(|e| e.contains("selftest"));
+    let hotkey = got.iter().any(|e| e.contains(r#""event":"hotkey""#) && e.contains(r#""id":"selftest""#));
+    let abbrev = got.iter().any(|e| e.contains(r#""event":"abbrev""#) && e.contains(r#""erase":2"#));
+    // swallowed: the hotkey's F24 down and up, the abbreviation's Space down and up
+    let ok = sent && fired == 1 && swallowed == 4 && hotkey && abbrev;
     println!(
         "{}",
-        json!({"selftest": if ok { "pass" } else { "fail" }, "sent": sent, "fired": fired, "swallowed": swallowed, "event": event})
+        json!({"selftest": if ok { "pass" } else { "fail" }, "sent": sent, "fired": fired, "swallowed": swallowed, "hotkey": hotkey, "abbrev": abbrev})
     );
     if ok { 0 } else { 1 }
 }

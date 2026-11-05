@@ -1,13 +1,14 @@
 //! macOS: a CGEventTap that sees left and right modifiers apart (device-dependent flag bits),
 //! CGEvents for typing, and NSPasteboard for pasting. Needs the Accessibility permission.
 
+use crate::abbrev::{Abbrev, Matcher, Stroke};
 use crate::keys::*;
 use serde_json::{json, Value};
 use std::ffi::{c_char, c_void, CStr, CString};
 use std::ptr::{null, null_mut};
 use std::sync::atomic::{AtomicBool, AtomicPtr, AtomicU32, Ordering::SeqCst};
 use std::sync::{mpsc, Mutex, OnceLock};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 pub const NAME: &str = "macos";
 
@@ -93,7 +94,14 @@ const TAP_DISABLED_BY_USER: u32 = 0xFFFF_FFFF;
 const FIELD_KEYCODE: u32 = 9; // kCGKeyboardEventKeycode
 const FIELD_USER_DATA: u32 = 42; // kCGEventSourceUserData
 const UTF8: u32 = 0x0800_0100; // kCFStringEncodingUTF8
+const FLAG_SHIFT: u64 = 0x0002_0000;
+const FLAG_CONTROL: u64 = 0x0004_0000;
+const FLAG_OPTION: u64 = 0x0008_0000;
 const FLAG_COMMAND: u64 = 0x0010_0000;
+/// Arrow keys carry the numeric-pad and Fn flags.
+const FLAGS_ARROW: u64 = 0x0020_0000 | 0x0080_0000;
+const KEY_DELETE: u16 = 0x33; // kVK_Delete (Backspace)
+const KEY_LEFT: u16 = 0x7B;
 
 /// Tag on everything we post, so our own tap lets it pass untouched.
 const OUR_INPUT: i64 = 0x4B42_5247;
@@ -107,6 +115,7 @@ const TEXT_TYPE: &str = "public.utf8-plain-text";
 const PASTE_SETTLE: Duration = Duration::from_millis(400);
 
 static HOTKEYS: Mutex<Vec<Hotkey>> = Mutex::new(Vec::new());
+static ABBREVS: Mutex<Matcher> = Mutex::new(Matcher::new());
 static PAUSED: AtomicBool = AtomicBool::new(false);
 static SWALLOWED: [AtomicBool; 128] = [const { AtomicBool::new(false) }; 128];
 static EVENTS: OnceLock<mpsc::Sender<String>> = OnceLock::new();
@@ -144,12 +153,21 @@ pub fn key_code(name: &str) -> Option<u32> {
     KEY_CODES.iter().find(|(n, _)| *n == name).map(|(_, code)| *code)
 }
 
+fn key_name(code: u32) -> Option<&'static str> {
+    KEY_CODES.iter().find(|(_, c)| *c == code).map(|(n, _)| *n)
+}
+
 pub fn set_hotkeys(list: Vec<Hotkey>) {
     *HOTKEYS.lock().unwrap() = list;
 }
 
+pub fn set_abbrevs(list: Vec<Abbrev>) {
+    ABBREVS.lock().unwrap().set(list);
+}
+
 pub fn set_paused(paused: bool) {
     PAUSED.store(paused, SeqCst);
+    ABBREVS.lock().unwrap().reset();
 }
 
 fn emit(event: Value) {
@@ -212,12 +230,17 @@ unsafe extern "C" fn tap_proc(_proxy: *mut c_void, kind: u32, event: CGEventRef,
         CGEventTapEnable(TAP.load(SeqCst), true);
         return event;
     }
-    if (kind == KEY_DOWN || kind == KEY_UP)
-        && CGEventGetIntegerValueField(event, FIELD_USER_DATA) != OUR_INPUT
-        && on_key(event, kind == KEY_DOWN)
-    {
-        SWALLOW_COUNT.fetch_add(1, SeqCst);
-        return null_mut();
+    if kind == KEY_DOWN || kind == KEY_UP {
+        let tag = CGEventGetIntegerValueField(event, FIELD_USER_DATA);
+        if tag != OUR_INPUT {
+            if on_key(event, kind == KEY_DOWN) {
+                SWALLOW_COUNT.fetch_add(1, SeqCst);
+                return null_mut();
+            }
+            if tag == SELFTEST_INPUT {
+                return null_mut(); // the self-test's keys never reach the app in front
+            }
+        }
     }
     event
 }
@@ -234,15 +257,34 @@ unsafe fn on_key(event: CGEventRef, down: bool) -> bool {
     if PAUSED.load(SeqCst) {
         return false;
     }
-    let mods = modifiers(CGEventGetFlags(event));
+    let flags = CGEventGetFlags(event);
+    let mods = modifiers(flags);
     let id = {
         let hotkeys = HOTKEYS.lock().unwrap();
         hotkeys.iter().find(|h| h.key == key as u32 && h.mods == mods).map(|h| h.id.clone())
     };
-    let Some(id) = id else { return false };
+    if let Some(id) = id {
+        SWALLOWED[key].store(true, SeqCst);
+        FIRED.fetch_add(1, SeqCst);
+        ABBREVS.lock().unwrap().reset();
+        emit(json!({"event": "hotkey", "id": id}));
+        return true;
+    }
+    abbrev_key(key, flags)
+}
+
+/// Feeds the abbreviation buffer. Returns true to swallow the key: the Space or Tab that fired one.
+fn abbrev_key(key: usize, flags: u64) -> bool {
+    let mut matcher = ABBREVS.lock().unwrap();
+    if flags & (FLAG_CONTROL | FLAG_OPTION | FLAG_COMMAND) != 0 {
+        matcher.reset(); // a Control / Option / Cmd combination, not typing
+        return false;
+    }
+    let class = key_name(key as u32).map(key_class).unwrap_or(KeyClass::Other);
+    let stroke = Stroke { key: key as u32, shift: flags & FLAG_SHIFT != 0 };
+    let Some(fired) = matcher.press(stroke, class) else { return false };
     SWALLOWED[key].store(true, SeqCst);
-    FIRED.fetch_add(1, SeqCst);
-    emit(json!({"event": "hotkey", "id": id}));
+    emit(json!({"event": "abbrev", "id": fired.id, "erase": fired.erase, "end": fired.end}));
     true
 }
 
@@ -292,8 +334,24 @@ unsafe fn post_key(keycode: u16, flags: u64, text: Option<&[u16]>, tag: i64) {
     }
 }
 
-pub fn type_text(text: &str) -> Result<(), String> {
+/// Backspaces for what an abbreviation left behind.
+unsafe fn erase_keys(erase: usize) {
+    for _ in 0..erase {
+        post_key(KEY_DELETE, 0, None, OUR_INPUT);
+    }
+}
+
+/// Left arrows that put the caret where {cursor} was.
+unsafe fn left_keys(left: usize) {
+    for _ in 0..left {
+        post_key(KEY_LEFT, FLAGS_ARROW, None, OUR_INPUT);
+    }
+}
+
+pub fn type_text(text: &str, erase: usize, left: usize) -> Result<(), String> {
+    ABBREVS.lock().unwrap().reset();
     unsafe {
+        erase_keys(erase);
         for ch in text.chars() {
             match ch {
                 '\r' => {}
@@ -305,14 +363,20 @@ pub fn type_text(text: &str) -> Result<(), String> {
                 }
             }
         }
+        left_keys(left);
     }
     Ok(())
 }
 
-pub fn paste_text(text: &str) -> Result<(), String> {
+pub fn paste_text(text: &str, erase: usize, left: usize) -> Result<(), String> {
+    ABBREVS.lock().unwrap().reset();
     let saved = pasteboard::save();
     pasteboard::write(&[vec![(TEXT_TYPE.to_string(), text.as_bytes().to_vec())]]);
-    unsafe { post_key(0x09, FLAG_COMMAND, None, OUR_INPUT) }; // Cmd + V
+    unsafe {
+        erase_keys(erase);
+        post_key(0x09, FLAG_COMMAND, None, OUR_INPUT); // Cmd + V
+        left_keys(left);
+    }
     std::thread::sleep(PASTE_SETTLE);
     pasteboard::write(&saved);
     Ok(())
@@ -469,7 +533,9 @@ mod pasteboard {
 }
 
 /// Posts F19 (a key no app reacts to) once with Right Shift held and once with Left Shift held,
-/// with a hotkey on Right Shift + F19, and checks the first was taken and swallowed and the second passed.
+/// with a hotkey on Right Shift + F19, and checks the first was taken and swallowed and the second
+/// passed. Then types ";q" + Space with an abbreviation on ";q" and checks it fired and the Space
+/// was taken. None of these keys reach the app in front.
 pub fn selftest() -> i32 {
     let fail = |reason: &str| {
         println!("{}", json!({"selftest": "fail", "reason": reason}));
@@ -491,19 +557,35 @@ pub fn selftest() -> i32 {
     }
     let f19 = key_code("F19").unwrap();
     set_hotkeys(vec![Hotkey { id: "selftest".into(), mods: SHIFT_RIGHT, key: f19 }]);
+    let (semicolon, q, space) = (key_code("Semicolon").unwrap(), key_code("KeyQ").unwrap(), key_code("Space").unwrap());
+    let stroke = |key| Stroke { key, shift: false };
+    set_abbrevs(vec![Abbrev { id: "selftest".into(), keys: vec![stroke(semicolon), stroke(q)], word: false }]);
     unsafe {
         post_key(f19 as u16, 0x0002_0004, None, SELFTEST_INPUT); // Right Shift held
         post_key(f19 as u16, 0x0002_0002, None, SELFTEST_INPUT); // Left Shift held
+        for key in [semicolon, q, space] {
+            post_key(key as u16, 0, None, SELFTEST_INPUT);
+        }
     }
-    let event = received.recv_timeout(Duration::from_secs(2)).ok();
+    let mut got = Vec::new();
+    let deadline = Instant::now() + Duration::from_secs(2);
+    while got.len() < 2 {
+        match received.recv_timeout(deadline.saturating_duration_since(Instant::now())) {
+            Ok(event) => got.push(event),
+            Err(_) => break,
+        }
+    }
     std::thread::sleep(Duration::from_millis(300));
 
     let fired = FIRED.load(SeqCst);
     let swallowed = SWALLOW_COUNT.load(SeqCst);
-    let ok = fired == 1 && swallowed == 2 && event.as_deref().is_some_and(|e| e.contains("selftest"));
+    let hotkey = got.iter().any(|e| e.contains(r#""event":"hotkey""#) && e.contains(r#""id":"selftest""#));
+    let abbrev = got.iter().any(|e| e.contains(r#""event":"abbrev""#) && e.contains(r#""erase":2"#));
+    // swallowed: the hotkey's F19 down and up, the abbreviation's Space down and up
+    let ok = fired == 1 && swallowed == 4 && hotkey && abbrev;
     println!(
         "{}",
-        json!({"selftest": if ok { "pass" } else { "fail" }, "fired": fired, "swallowed": swallowed, "event": event})
+        json!({"selftest": if ok { "pass" } else { "fail" }, "fired": fired, "swallowed": swallowed, "hotkey": hotkey, "abbrev": abbrev})
     );
     if ok { 0 } else { 1 }
 }

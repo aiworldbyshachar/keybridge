@@ -1,18 +1,23 @@
 //! KeyBridge keyboard helper.
 //!
-//! Listens for hotkeys with left and right modifier keys told apart, swallows the ones it owns, and
-//! types or pastes text. Talks JSON lines: commands on stdin, events on stdout. It never logs or
-//! stores keystrokes - the only thing it reports about the keyboard is "hotkey <id> fired".
+//! Listens for hotkeys with left and right modifier keys told apart and for abbreviations, swallows
+//! the ones it owns, and types or pastes text. Talks JSON lines: commands on stdin, events on
+//! stdout. It never logs or stores keystrokes - the only thing it reports about the keyboard is
+//! "hotkey <id> fired" or "abbreviation <id> fired".
 //!
 //! Commands:
 //!   {"cmd":"setHotkeys","hotkeys":[{"id":"addr","mods":["ShiftRight"],"key":"KeyA"}]}
-//!   {"cmd":"type","text":"..."}     short text, typed as Unicode (any layout, any language)
-//!   {"cmd":"paste","text":"..."}    long text, pasted; the previous clipboard comes back after
+//!   {"cmd":"setAbbrevs","abbrevs":[{"id":"addr","keys":["Semicolon","KeyA","Shift+KeyD"],"word":false}]}
+//!   {"cmd":"type","text":"...","erase":0,"left":0}   short text, typed as Unicode (any layout, any
+//!                                   language), after `erase` Backspaces; then the caret moves `left`
+//!   {"cmd":"paste","text":"...","erase":0,"left":0}  long text, pasted; the clipboard comes back after
 //!   {"cmd":"pause","paused":true}
 //!   {"cmd":"layout"}                the keyboard layout of the window in front
 //!   {"cmd":"quit"}
-//! Events: ready, hotkeysSet, hotkey, done, layout, permission (macOS), error.
+//! Events: ready, hotkeysSet, abbrevsSet, hotkey, abbrev {id, erase, end}, done, layout,
+//! permission (macOS), error.
 
+mod abbrev;
 mod keys;
 #[cfg(target_os = "macos")]
 mod mac;
@@ -71,6 +76,8 @@ fn main() {
 fn handle(cmd: &Value) -> Value {
     let name = cmd["cmd"].as_str().unwrap_or("");
     let text = cmd["text"].as_str().unwrap_or("");
+    let count = |field: &str, max: u64| cmd[field].as_u64().unwrap_or(0).min(max) as usize;
+    let (erase, left) = (count("erase", abbrev::MAX_KEYS as u64), count("left", 100_000));
     let done = |result: Result<(), String>| match result {
         Ok(()) => json!({"event": "done", "cmd": name}),
         Err(e) => json!({"event": "error", "cmd": name, "message": e}),
@@ -82,8 +89,14 @@ fn handle(cmd: &Value) -> Value {
             platform::set_hotkeys(hotkeys);
             json!({"event": "hotkeysSet", "count": count, "skipped": skipped})
         }
-        "type" => done(platform::type_text(text)),
-        "paste" => done(platform::paste_text(text)),
+        "setAbbrevs" => {
+            let (abbrevs, skipped) = parse_abbrevs(&cmd["abbrevs"]);
+            let count = abbrevs.len();
+            platform::set_abbrevs(abbrevs);
+            json!({"event": "abbrevsSet", "count": count, "skipped": skipped})
+        }
+        "type" => done(platform::type_text(text, erase, left)),
+        "paste" => done(platform::paste_text(text, erase, left)),
         "pause" => {
             platform::set_paused(cmd["paused"].as_bool().unwrap_or(true));
             json!({"event": "done", "cmd": name})
@@ -114,4 +127,34 @@ fn parse_hotkeys(list: &Value) -> (Vec<keys::Hotkey>, Vec<String>) {
         }
     }
     (hotkeys, skipped)
+}
+
+/// Turns the JSON abbreviation list into key sequences ("Shift+KeyA" = A with Shift held); ids
+/// with an unknown key are skipped.
+fn parse_abbrevs(list: &Value) -> (Vec<abbrev::Abbrev>, Vec<String>) {
+    let mut abbrevs = Vec::new();
+    let mut skipped = Vec::new();
+    for item in list.as_array().into_iter().flatten() {
+        let id = item["id"].as_str().unwrap_or("").to_string();
+        let strokes = item["keys"].as_array().and_then(|names| {
+            names
+                .iter()
+                .map(|name| {
+                    let name = name.as_str()?;
+                    let (shift, name) = match name.strip_prefix("Shift+") {
+                        Some(rest) => (true, rest),
+                        None => (false, name),
+                    };
+                    platform::key_code(name).map(|key| abbrev::Stroke { key, shift })
+                })
+                .collect::<Option<Vec<_>>>()
+        });
+        match strokes {
+            Some(keys) if !id.is_empty() && !keys.is_empty() && keys.len() <= abbrev::MAX_KEYS => {
+                abbrevs.push(abbrev::Abbrev { id, keys, word: item["word"].as_bool().unwrap_or(false) })
+            }
+            _ => skipped.push(id),
+        }
+    }
+    (abbrevs, skipped)
 }
