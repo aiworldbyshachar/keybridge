@@ -198,8 +198,15 @@ function winTray({ glyph, hue }) {
   return [bg, ...cap(0.5, 0.53, 0.4, 0.36, 0.07, 0.11), { shape: arrows(0.4, 0.62, 0.27, 0.73, 0.055, 0.15), paint: BLUE }];
 }
 
-// macOS menu bar template: a black key cap with the arrows cut out (only alpha matters).
-function macTray() {
+// macOS menu bar template: black key caps with the arrows cut out (only alpha matters).
+function macTray({ glyph }) {
+  if (glyph === 'caps') {
+    return [
+      { shape: roundRect(0.19, 0.52, 0.14, 0.3, 0.07), paint: solid('#000000') },
+      { shape: roundRect(0.675, 0.52, 0.275, 0.3, 0.08), paint: solid('#000000') },
+      { shape: arrows(0.42, 0.62, 0.52, 0.83, 0.045, 0.11), erase: true },
+    ];
+  }
   return [
     { shape: roundRect(0.5, 0.52, 0.44, 0.38, 0.12), paint: solid('#000000') },
     { shape: arrows(0.4, 0.62, 0.25, 0.75, 0.055, 0.15), erase: true },
