@@ -1071,6 +1071,13 @@
     }
   });
 
+  // The page itself never scrolls (only its lists do); if anything scrolls it anyway, put it back,
+  // or the window would look empty.
+  document.addEventListener('scroll', () => {
+    if (document.scrollingElement.scrollTop || document.scrollingElement.scrollLeft) document.scrollingElement.scrollTo(0, 0);
+  });
+  for (const el of [document.body, $('.app')]) el.addEventListener('scroll', () => el.scrollTo(0, 0));
+
   api.on('state:changed', refresh);
   api.on('recorded', recorded);
   api.on('account:code', (code) => {

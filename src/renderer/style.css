@@ -887,7 +887,11 @@ textarea:focus {
   margin-top: 14px;
 }
 
+/* position: relative keeps the hidden checkbox inside its switch: otherwise it sits against the
+   whole page, and when a click focuses it far down a list the browser scrolls the page itself to
+   it - and the window looks blank. */
 .toggle {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 12px;
