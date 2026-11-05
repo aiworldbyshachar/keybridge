@@ -26,9 +26,11 @@ jobs:
           if-no-files-found: error
 
   mac:
-    # Intel runner: the Apple Silicon ones (macos-latest) twice never picked the job up (capacity).
-    # It builds both architectures just the same.
-    runs-on: macos-15-intel
+    # On this private repo the macOS job never got a runner (three tries, Apple Silicon and Intel),
+    # so for now it runs only when started by hand (Actions > Helper > Run workflow) and the Mac
+    # helper is built on the MacBook with dev/mac-spike.sh. Drop this `if` once the repo is public.
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
