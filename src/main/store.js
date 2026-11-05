@@ -301,6 +301,44 @@ class Store extends EventEmitter {
     if (this.data.trash.length !== before) this._changed('forget', trashId);
   }
 
+  // --- sync (see sync.js)
+
+  // Everything the cloud keeps, by id: { t: 'group' | 'shortcut' | 'trash', v: item }. Usage counts
+  // stay on each computer, so using a shortcut doesn't make a change to sync.
+  syncItems() {
+    const items = new Map();
+    for (const g of this.data.groups) items.set(g.id, { t: 'group', v: g });
+    for (const s of this.data.shortcuts) items.set(s.id, { t: 'shortcut', v: { ...s, usages: 0 } });
+    for (const e of this.data.trash) items.set(e.id, { t: 'trash', v: e });
+    return items;
+  }
+
+  // Changes from the cloud: [{ id, value: { t, v } | null for deleted }]. Nothing goes to the trash
+  // here - the computer that deleted or replaced something put it there, and that syncs too.
+  applyRemote(changes) {
+    if (!changes.length) return;
+    for (const { id, value } of changes) {
+      const old = this.get(id);
+      this.data.groups = this.data.groups.filter((g) => g.id !== id);
+      this.data.shortcuts = this.data.shortcuts.filter((s) => s.id !== id);
+      this.data.trash = this.data.trash.filter((t) => t.id !== id);
+      if (!value || !value.v || typeof value.v !== 'object') continue;
+      if (value.t === 'group') this.data.groups.push(cleanGroup({ ...value.v, id }));
+      // the group may come in a later change, so the shortcut keeps its groupId as it is
+      else if (value.t === 'shortcut') this.data.shortcuts.push({ ...cleanShortcut({ ...value.v, id }), usages: old ? old.usages : 0 });
+      else if (value.t === 'trash' && Number.isFinite(value.v.at)) this.data.trash.push({ ...value.v, id });
+    }
+    this._changed('remote', null);
+  }
+
+  // A version that lost a sync conflict.
+  keepInTrash(value, reason = 'conflict') {
+    if (value && value.t === 'shortcut') this._toTrash({ shortcut: value.v }, reason);
+    else if (value && value.t === 'group') this._toTrash({ group: value.v, shortcuts: [] }, reason);
+    else return;
+    this._changed('trash', null);
+  }
+
   // Drops trash entries older than `days`. Returns how many.
   purge(days = KEEP_DAYS) {
     const before = this.now() - days * 24 * 3600 * 1000;
