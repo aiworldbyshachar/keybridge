@@ -12,10 +12,11 @@
 //!                                   language), after `erase` Backspaces; then the caret moves `left`
 //!   {"cmd":"paste","text":"...","erase":0,"left":0}  long text, pasted; the clipboard comes back after
 //!   {"cmd":"pause","paused":true}
+//!   {"cmd":"record","on":true}     the next key press (with its modifiers) is reported, not typed
 //!   {"cmd":"layout"}                the keyboard layout of the window in front
 //!   {"cmd":"quit"}
-//! Events: ready, hotkeysSet, abbrevsSet, hotkey, abbrev {id, erase, end}, done, layout,
-//! permission (macOS), error.
+//! Events: ready, hotkeysSet, abbrevsSet, hotkey, abbrev {id, erase, end}, recorded {mods, key},
+//! done, layout, permission (macOS), error.
 
 mod abbrev;
 mod keys;
@@ -99,6 +100,10 @@ fn handle(cmd: &Value) -> Value {
         "paste" => done(platform::paste_text(text, erase, left)),
         "pause" => {
             platform::set_paused(cmd["paused"].as_bool().unwrap_or(true));
+            json!({"event": "done", "cmd": name})
+        }
+        "record" => {
+            platform::set_recording(cmd["on"].as_bool().unwrap_or(true));
             json!({"event": "done", "cmd": name})
         }
         "layout" => platform::layout(),

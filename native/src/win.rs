@@ -41,6 +41,8 @@ static LAST_WINDOW: AtomicUsize = AtomicUsize::new(0);
 /// Modifiers physically held, from the hook (our own injected keys don't count).
 static MODS: AtomicU32 = AtomicU32::new(0);
 static PAUSED: AtomicBool = AtomicBool::new(false);
+/// The editor is recording a hotkey: the next key press is reported instead of typed.
+static RECORDING: AtomicBool = AtomicBool::new(false);
 /// Keys whose down event we swallowed, so their up event (and auto-repeat) is swallowed too.
 static SWALLOWED: [AtomicBool; 512] = [const { AtomicBool::new(false) }; 512];
 static EVENTS: OnceLock<mpsc::Sender<String>> = OnceLock::new();
@@ -111,6 +113,10 @@ pub fn set_abbrevs(list: Vec<Abbrev>) {
 pub fn set_paused(paused: bool) {
     PAUSED.store(paused, SeqCst);
     ABBREVS.lock().unwrap().reset();
+}
+
+pub fn set_recording(on: bool) {
+    RECORDING.store(on, SeqCst);
 }
 
 fn emit(event: Value) {
@@ -184,6 +190,13 @@ fn on_key(ev: &KBDLLHOOKSTRUCT, msg: u32) -> bool {
     if SWALLOWED[key].load(SeqCst) {
         return true; // auto-repeat of a hotkey we already took
     }
+    let injected = ev.flags & LLKHF_INJECTED != 0 && ev.dwExtraInfo != SELFTEST_INPUT;
+    if !injected && RECORDING.swap(false, SeqCst) {
+        SWALLOWED[key].store(true, SeqCst);
+        let mods = modifier_names(held_modifiers());
+        emit(json!({"event": "recorded", "mods": mods, "key": key_name(key as u32).unwrap_or("")}));
+        return true;
+    }
     if PAUSED.load(SeqCst) {
         return false;
     }
@@ -200,7 +213,7 @@ fn on_key(ev: &KBDLLHOOKSTRUCT, msg: u32) -> bool {
         return true;
     }
     // Keys other tools inject (another text expander, remote control) aren't the user typing.
-    if ev.flags & LLKHF_INJECTED != 0 && ev.dwExtraInfo != SELFTEST_INPUT {
+    if injected {
         return false;
     }
     abbrev_key(key, mods)

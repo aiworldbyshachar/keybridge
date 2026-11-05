@@ -25,6 +25,10 @@ pub fn modifier_bit(name: &str) -> Option<u32> {
     NAMES.iter().find(|(n, _)| *n == name).map(|(_, bit)| *bit)
 }
 
+pub fn modifier_names(mods: u32) -> Vec<&'static str> {
+    NAMES.iter().filter(|(_, bit)| mods & bit != 0).map(|(n, _)| *n).collect()
+}
+
 /// One hotkey the helper owns. `key` is the platform's physical key code.
 pub struct Hotkey {
     pub id: String,

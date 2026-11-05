@@ -15,6 +15,7 @@
   "private": true,
   "scripts": {
     "start": "electron .",
+    "preview": "node dev/serve.js",
     "icons": "node scripts/make-icons.js",
     "test": "node --test test/*.test.js",
     "helper": "cargo build --release --manifest-path native/Cargo.toml",

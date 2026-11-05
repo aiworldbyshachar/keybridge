@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KeyBridge</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <img src="../../assets/icon-128.png" alt="" width="26" height="26">
+        <span>KeyBridge</span>
+      </div>
+      <button class="status" id="status" type="button" data-i18n-title="accountTitle">
+        <span class="dot"></span><span class="status-label"></span>
+      </button>
+      <button class="btn small" id="pause" type="button"></button>
+      <button class="icon-btn" id="open-trash" type="button" data-i18n-title="trash" data-icon="trash"></button>
+      <button class="icon-btn" id="open-settings" type="button" data-i18n-title="settings" data-icon="settings"></button>
+    </header>
+
+    <div class="banners" id="banners"></div>
+
+    <div class="body">
+      <aside class="sidebar">
+        <nav class="groups" id="groups" data-i18n-aria="groups"></nav>
+        <button class="link add-group" id="add-group" type="button" data-i18n="newGroup"></button>
+        <div class="account-card" id="account-card"></div>
+      </aside>
+
+      <main class="main">
+        <div class="toolbar">
+          <div class="searchbar">
+            <span class="search-icon" data-icon="search"></span>
+            <input id="search" type="search" data-i18n-placeholder="searchPlaceholder" data-i18n-aria="search" autocomplete="off" spellcheck="false">
+          </div>
+          <button class="btn primary" id="new-shortcut" type="button"><span data-icon="plus"></span><span data-i18n="newShortcut"></span></button>
+        </div>
+        <div class="list" id="list" data-i18n-aria="shortcuts"></div>
+        <footer class="footer">
+          <span id="count"></span>
+          <span id="footer-hint"></span>
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <!-- the shortcut editor, a panel over the list -->
+  <div class="scrim" id="editor-scrim" hidden></div>
+  <section class="panel" id="editor" hidden aria-modal="true" role="dialog" aria-labelledby="editor-title">
+    <header class="sheet-head">
+      <button class="icon-btn flip-ltr" id="close-editor" type="button" data-i18n-title="close" data-icon="back"></button>
+      <h2 id="editor-title"></h2>
+    </header>
+    <div class="sheet-body">
+      <section class="group">
+        <h3 data-i18n="edTrigger"></h3>
+        <div class="segmented" id="trigger-type" role="radiogroup" data-i18n-aria="edTrigger">
+          <button type="button" data-value="hotkey" data-i18n="edHotkey"></button>
+          <button type="button" data-value="abbrev" data-i18n="edAbbrev"></button>
+        </div>
+        <div id="hotkey-box">
+          <div class="recorder" id="recorder" tabindex="0" role="button" data-i18n-aria="edRecord">
+            <span class="recorder-value" id="recorder-value"></span>
+          </div>
+          <div class="row-actions">
+            <button class="btn small" id="record" type="button"></button>
+            <button class="link" id="clear-trigger" type="button" data-i18n="edClear"></button>
+          </div>
+        </div>
+        <div id="abbrev-box" hidden>
+          <label class="field">
+            <input id="abbrev" dir="auto" maxlength="24" autocomplete="off" spellcheck="false" data-i18n-placeholder="edAbbrevPlaceholder">
+          </label>
+          <p class="help" data-i18n="edAbbrevHelp"></p>
+        </div>
+        <div class="notes" id="trigger-notes"></div>
+      </section>
+
+      <section class="group">
+        <h3 data-i18n="edAction"></h3>
+        <div class="segmented four" id="kind" role="radiogroup" data-i18n-aria="edAction">
+          <button type="button" data-value="text" data-i18n="kindText"></button>
+          <button type="button" data-value="link" data-i18n="kindLink"></button>
+          <button type="button" data-value="file" data-i18n="kindFile"></button>
+          <button type="button" data-value="program" data-i18n="kindProgram"></button>
+        </div>
+        <div id="text-box">
+          <textarea id="text" rows="5" dir="auto" data-i18n-placeholder="edTextPlaceholder"></textarea>
+          <div class="vars" id="vars">
+            <span data-i18n="edInsert"></span>
+            <button class="chip" type="button" data-var="date" data-i18n="varDate"></button>
+            <button class="chip" type="button" data-var="time" data-i18n="varTime"></button>
+            <button class="chip" type="button" data-var="clipboard" data-i18n="varClipboard"></button>
+            <button class="chip" type="button" data-var="cursor" data-i18n="varCursor"></button>
+          </div>
+          <p class="help" id="text-mode"></p>
+        </div>
+        <div id="link-box" hidden>
+          <label class="field"><input id="url" dir="ltr" placeholder="https://" autocomplete="off" spellcheck="false"></label>
+        </div>
+        <div id="path-box" hidden>
+          <label class="field">
+            <span data-i18n="edPathWin"></span>
+            <div class="field-row"><input id="path-win" dir="ltr" autocomplete="off" spellcheck="false"><button class="btn" type="button" id="choose-win" data-i18n="edChoose"></button></div>
+          </label>
+          <label class="field">
+            <span data-i18n="edPathMac"></span>
+            <div class="field-row"><input id="path-mac" dir="ltr" autocomplete="off" spellcheck="false"><button class="btn" type="button" id="choose-mac" data-i18n="edChoose"></button></div>
+          </label>
+          <label class="field" id="args-field">
+            <span data-i18n="edArgs"></span>
+            <input id="args" dir="ltr" autocomplete="off" spellcheck="false">
+          </label>
+        </div>
+      </section>
+
+      <section class="group">
+        <h3 data-i18n="edDetails"></h3>
+        <label class="field">
+          <span data-i18n="edName"></span>
+          <input id="name" dir="auto" maxlength="200" autocomplete="off" data-i18n-placeholder="edNamePlaceholder">
+        </label>
+        <div class="two">
+          <label class="field">
+            <span data-i18n="edGroup"></span>
+            <select id="group"></select>
+          </label>
+          <label class="field">
+            <span data-i18n="edWorksOn"></span>
+            <select id="platforms">
+              <option value="all" data-i18n="scopeAll"></option>
+              <option value="win" data-i18n="scopeWin"></option>
+              <option value="mac" data-i18n="scopeMac"></option>
+            </select>
+          </label>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="enabled">
+          <span class="track"></span>
+          <span class="toggle-text"><b data-i18n="edOn"></b><small data-i18n="edOnHint"></small></span>
+        </label>
+      </section>
+      <p class="msg error" id="editor-msg" hidden></p>
+    </div>
+    <footer class="panel-foot">
+      <button class="btn danger" id="delete-shortcut" type="button" data-i18n="delete"></button>
+      <button class="btn" id="duplicate-shortcut" type="button" data-i18n="duplicate"></button>
+      <span class="grow"></span>
+      <button class="btn" id="cancel-editor" type="button" data-i18n="cancel"></button>
+      <button class="btn primary" id="save-shortcut" type="button" data-i18n="save"></button>
+    </footer>
+  </section>
+
+  <section class="sheet" id="trash" hidden data-i18n-aria="trash">
+    <header class="sheet-head">
+      <button class="icon-btn flip-ltr" id="close-trash" type="button" data-i18n-title="back" data-icon="back"></button>
+      <h2 data-i18n="trash"></h2>
+    </header>
+    <div class="sheet-body narrow">
+      <p class="help" data-i18n="trashHelp"></p>
+      <div class="trash-list" id="trash-list"></div>
+    </div>
+  </section>
+
+  <section class="sheet" id="account" hidden data-i18n-aria="account">
+    <header class="sheet-head">
+      <button class="icon-btn flip-ltr" id="close-account" type="button" data-i18n-title="back" data-icon="back"></button>
+      <h2 data-i18n="account"></h2>
+    </header>
+    <div class="sheet-body narrow" id="account-body"></div>
+  </section>
+
+  <section class="sheet" id="settings" hidden data-i18n-aria="settings">
+    <header class="sheet-head">
+      <button class="icon-btn flip-ltr" id="close-settings" type="button" data-i18n-title="back" data-icon="back"></button>
+      <h2 data-i18n="settings"></h2>
+    </header>
+    <div class="sheet-body narrow">
+      <section class="group">
+        <h3 data-i18n="setGeneral"></h3>
+        <label class="field">
+          <span data-i18n="language"></span>
+          <select id="language"></select>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" data-setting="openAtLogin">
+          <span class="track"></span>
+          <span class="toggle-text"><b data-i18n="setLogin"></b><small data-i18n="setLoginHint"></small></span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" data-setting="paused">
+          <span class="track"></span>
+          <span class="toggle-text"><b data-i18n="setPaused"></b><small data-i18n="setPausedHint"></small></span>
+        </label>
+      </section>
+
+      <section class="group">
+        <h3 data-i18n="setImport"></h3>
+        <div class="import-clavier" id="import-clavier" hidden>
+          <p class="help" id="clavier-found"></p>
+          <button class="btn" id="run-clavier" type="button" data-i18n="setImportClavier"></button>
+        </div>
+        <div class="row-actions">
+          <button class="btn" id="import-json" type="button" data-i18n="setImportFile"></button>
+          <button class="btn" id="export-json" type="button" data-i18n="setExportFile"></button>
+        </div>
+        <p class="help" data-i18n="setExportHelp"></p>
+      </section>
+
+      <section class="group">
+        <h3 data-i18n="setThisComputer"></h3>
+        <label class="field">
+          <span data-i18n="setDeviceName"></span>
+          <input id="device-name" maxlength="60" autocomplete="off">
+        </label>
+        <p class="help" data-i18n="setDeviceHelp"></p>
+        <button class="btn" id="open-data" type="button" data-i18n="setOpenData"></button>
+      </section>
+
+      <section class="group privacy">
+        <h3 data-i18n="setPrivacy"></h3>
+        <p class="help" data-i18n="setPrivacyText"></p>
+      </section>
+
+      <p class="about">KeyBridge <span id="version"></span></p>
+    </div>
+  </section>
+
+  <section class="sheet" id="welcome" hidden data-i18n-aria="welcomeTitle">
+    <div class="sheet-body narrow welcome">
+      <img src="../../assets/icon-128.png" alt="" width="64" height="64">
+      <h1 data-i18n="welcomeTitle"></h1>
+      <p class="lead" data-i18n="welcomeLead"></p>
+      <div id="welcome-steps"></div>
+      <button class="btn primary big" id="welcome-done" type="button" data-i18n="welcomeDone"></button>
+    </div>
+  </section>
+
+  <div class="scrim" id="dialog-scrim" hidden></div>
+  <section class="dialog" id="dialog" hidden role="dialog" aria-modal="true"></section>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="../shared/i18n.js"></script>
+  <script src="../shared/keys.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

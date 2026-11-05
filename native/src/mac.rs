@@ -117,6 +117,8 @@ const PASTE_SETTLE: Duration = Duration::from_millis(400);
 static HOTKEYS: Mutex<Vec<Hotkey>> = Mutex::new(Vec::new());
 static ABBREVS: Mutex<Matcher> = Mutex::new(Matcher::new());
 static PAUSED: AtomicBool = AtomicBool::new(false);
+/// The editor is recording a hotkey: the next key press is reported instead of typed.
+static RECORDING: AtomicBool = AtomicBool::new(false);
 static SWALLOWED: [AtomicBool; 128] = [const { AtomicBool::new(false) }; 128];
 static EVENTS: OnceLock<mpsc::Sender<String>> = OnceLock::new();
 static TAP: AtomicPtr<c_void> = AtomicPtr::new(null_mut());
@@ -168,6 +170,10 @@ pub fn set_abbrevs(list: Vec<Abbrev>) {
 pub fn set_paused(paused: bool) {
     PAUSED.store(paused, SeqCst);
     ABBREVS.lock().unwrap().reset();
+}
+
+pub fn set_recording(on: bool) {
+    RECORDING.store(on, SeqCst);
 }
 
 fn emit(event: Value) {
@@ -254,10 +260,15 @@ unsafe fn on_key(event: CGEventRef, down: bool) -> bool {
     if SWALLOWED[key].load(SeqCst) {
         return true; // auto-repeat of a hotkey we already took
     }
+    let flags = CGEventGetFlags(event);
+    if RECORDING.swap(false, SeqCst) {
+        SWALLOWED[key].store(true, SeqCst);
+        emit(json!({"event": "recorded", "mods": modifier_names(modifiers(flags)), "key": key_name(key as u32).unwrap_or("")}));
+        return true;
+    }
     if PAUSED.load(SeqCst) {
         return false;
     }
-    let flags = CGEventGetFlags(event);
     let mods = modifiers(flags);
     let id = {
         let hotkeys = HOTKEYS.lock().unwrap();
