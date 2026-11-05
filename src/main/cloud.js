@@ -150,6 +150,22 @@ class Cloud extends EventEmitter {
     this.emit('signed-out');
   }
 
+  // Whether this session still exists. The data server accepts a token until it runs out (up to an
+  // hour), but the sign-in service knows at once when the session was ended from another computer
+  // or the account deleted: then this throws CloudError('ended').
+  async checkSession() {
+    try {
+      await this._call('/auth/v1/user');
+    } catch (err) {
+      if (err.code === 'signed-out' || err.status === 401 || err.status === 403 || err.status === 404) {
+        this.session = null;
+        this.emit('signed-out');
+        throw new CloudError('ended', err.status);
+      }
+      throw err;
+    }
+  }
+
   // The session id inside the token, so another computer can sign this one out.
   get sessionId() {
     return (this.session && claims(this.session.access_token).session_id) || null;

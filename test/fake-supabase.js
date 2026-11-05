@@ -44,10 +44,14 @@ class FakeSupabase {
     return { access_token: access, refresh_token: refresh, expires_in: this.tokenLife, expires_at: exp, token_type: 'bearer', user: { id: userId, email } };
   }
 
-  _user(req) {
+  // Like the real data server: a token is good until it runs out, even if its session was ended.
+  _token(req) {
     const t = this.tokens.get(String(req.headers.authorization || '').replace(/^Bearer /, ''));
-    if (!t || t.exp * 1000 <= this.now() || this.sessions.get(t.sessionId).revoked || !this.users.has([...this.users].find(([, id]) => id === t.userId)?.[0])) return null;
-    return t;
+    return t && t.exp * 1000 > this.now() ? t : null;
+  }
+
+  _userExists(id) {
+    return [...this.users.values()].includes(id);
   }
 
   async _handle(req, res) {
@@ -88,9 +92,17 @@ class FakeSupabase {
       return send(200, this._issue(s.userId, sessionId));
     }
 
-    const t = this._user(req);
+    const t = this._token(req);
     if (!t) return send(401, { code: 'PGRST301', message: 'JWT expired' });
     const uid = t.userId;
+    // the sign-in service checks the session and the user right away
+    if (p === '/auth/v1/user') {
+      if (!this._userExists(uid)) return send(403, { error_code: 'user_not_found' });
+      if (this.sessions.get(t.sessionId).revoked) return send(403, { error_code: 'session_not_found' });
+      return send(200, { id: uid });
+    }
+    // a deleted account's rows are gone; writing fails on the missing user
+    if (!this._userExists(uid) && req.method !== 'GET') return send(409, { code: '23503' });
     if (p === '/auth/v1/logout') {
       this.sessions.get(t.sessionId).revoked = true;
       return send(204);

@@ -119,7 +119,7 @@ test('after a restart it is ready at once, and keeps working when the token runs
 });
 
 test('signed out from another computer: this one notices, keeps its shortcuts, forgets the session and code', async (t) => {
-  const { computer, signIn, cleanup } = await setup();
+  const { clock, computer, signIn, cleanup } = await setup();
   t.after(cleanup);
   const pc = computer('pc');
   const { code } = await signIn(pc);
@@ -133,8 +133,8 @@ test('signed out from another computer: this one notices, keeps its shortcuts, f
   const ended = [];
   mac.account.on('ended', (why) => ended.push(why));
   await pc.account.signOutDevice('mac');
-  // the Mac's next request fails, and renewing the session fails too
-  mac.account.cloud.session.expires_at = 0;
+  // the Mac's token would still be good for up to an hour; its next session check notices
+  clock.at += 61000;
   await mac.account.syncNow();
   assert.deepStrictEqual([mac.account.state, ended], ['signed-out', ['remote']]);
   assert.deepStrictEqual(mac.store.shortcuts().map((s) => s.text), ['kept here']);
@@ -162,7 +162,7 @@ test('signing out here keeps the shortcuts; signing back in brings no copies', a
 });
 
 test('deleting the account ends it on every computer, the shortcuts stay', async (t) => {
-  const { server, computer, signIn, cleanup } = await setup();
+  const { server, clock, computer, signIn, cleanup } = await setup();
   t.after(cleanup);
   const pc = computer('pc');
   pc.store.add({ text: 'stays here' });
@@ -176,7 +176,7 @@ test('deleting the account ends it on every computer, the shortcuts stay', async
   await pc.account.deleteAccount();
   assert.strictEqual(server.cloud.accounts.size, 0);
   assert.strictEqual(server.users.size, 0);
-  mac.account.cloud.session.expires_at = 0;
+  clock.at += 61000;
   await mac.account.syncNow();
   assert.deepStrictEqual(ended.sort(), ['deleted', 'mac remote']);
   assert.deepStrictEqual([pc.store.shortcuts().length, mac.store.shortcuts().length], [1, 1]);

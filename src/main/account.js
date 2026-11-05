@@ -21,6 +21,7 @@ const { generateCode, formatCode, isValidCode } = require('./code');
 const QUIET = 2000; // a change here syncs after this pause
 const EVERY = 5 * 60 * 1000;
 const DEVICE_EVERY = 30 * 60 * 1000;
+const SESSION_CHECK = 60 * 1000;
 
 class AccountError extends Error {
   constructor(code) {
@@ -146,7 +147,8 @@ class Account extends EventEmitter {
     this.store.on('change', this.onStoreChange);
     this.timers.every = setInterval(() => this.syncSoon(0), EVERY);
     this.timers.device = setInterval(() => this._saveDevice(), DEVICE_EVERY);
-    for (const t of [this.timers.every, this.timers.device]) if (t.unref) t.unref();
+    this.timers.session = setInterval(() => this._checkSession(), SESSION_CHECK);
+    for (const t of [this.timers.every, this.timers.device, this.timers.session]) if (t.unref) t.unref();
     this._setState('ready');
     this.realtime.start();
     this._saveDevice();
@@ -163,6 +165,12 @@ class Account extends EventEmitter {
   async syncNow() {
     if (this.state !== 'ready') return null;
     try {
+      // signed out from another computer, or the account deleted: notice within a minute
+      if (this.now() - (this.sessionChecked || 0) > SESSION_CHECK) {
+        await this.cloud.checkSession();
+        this.sessionChecked = this.now();
+      }
+      if (this.state !== 'ready') return null;
       const result = await this.sync.run();
       this.lastSync = this.now();
       this.offline = false;
@@ -173,6 +181,15 @@ class Account extends EventEmitter {
       this.emit('sync-failed', err);
       return null;
     }
+  }
+
+  // Ended elsewhere? The cloud's 'signed-out' event then signs this computer out (see constructor).
+  async _checkSession() {
+    if (this.state !== 'ready') return;
+    try {
+      await this.cloud.checkSession();
+      this.sessionChecked = this.now();
+    } catch {}
   }
 
   async _saveDevice() {
