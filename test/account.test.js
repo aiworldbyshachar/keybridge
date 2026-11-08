@@ -208,6 +208,13 @@ test('the cloud client: PKCE, the key on every request, a wrong verifier refused
   const wrongKey = new Cloud({ url, key: 'sb_publishable_wrong' });
   await assert.rejects(wrongKey.sendLink('x@example.com'), (e) => e.code === 'denied');
   await assert.rejects(new Cloud({ url: 'http://127.0.0.1:1', key: KEY }).sendLink('x@example.com'), (e) => e.code === 'offline');
+  // Supabase's email limit: 'too-many', with its error code kept for the log
+  const limited = new Cloud({
+    url,
+    key: KEY,
+    fetch: async () => new Response(JSON.stringify({ code: 429, error_code: 'over_email_send_rate_limit', msg: 'email rate limit exceeded' }), { status: 429 }),
+  });
+  await assert.rejects(limited.sendLink('x@example.com'), (e) => e.code === 'too-many' && e.status === 429 && e.detail === 'over_email_send_rate_limit');
 });
 
 test('config: from .env, the environment or the installed app\'s cloud.json; the secret key is refused', () => {

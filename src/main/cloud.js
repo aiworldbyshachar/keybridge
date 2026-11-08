@@ -15,6 +15,7 @@ class CloudError extends Error {
     super(`cloud: ${code}${detail ? ` (${detail})` : ''}`);
     this.code = code;
     this.status = status;
+    this.detail = String(detail);
   }
 }
 

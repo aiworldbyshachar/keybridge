@@ -465,6 +465,9 @@ function setupIpc() {
       await account.signIn(email);
       return { ok: true };
     } catch (err) {
+      // the reason only - Supabase's error code (e.g. over_email_send_rate_limit), never the address
+      const code = /^[a-z0-9_]+$/.test(err.detail || '') ? ` ${err.detail}` : '';
+      log(`sign-in failed: ${err.code || 'error'}${err.status ? ` ${err.status}` : ''}${code}`);
       return fail(err);
     }
   });
