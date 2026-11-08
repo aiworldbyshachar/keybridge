@@ -6,7 +6,8 @@
 //
 // A hotkey is written once for both systems: key names are physical and modifiers are mapped by
 // function (Alt = Option, Meta = Win / Cmd), always keeping the side. `mac` / `win` hold an override
-// only where the key doesn't exist on that system's keyboards (Right Control on most Macs).
+// only where the key doesn't exist on that system's keyboards (Right Control on most Macs). An
+// override equal to the hotkey itself is the user's "Ignore": the same keys there, on purpose.
 // 'Shift', 'Control', 'Alt', 'Meta' (no side) match either side.
 const keys = require('../shared/keys');
 const abbrev = require('./abbrev');
@@ -135,6 +136,17 @@ function note(trigger, platform) {
   return null;
 }
 
+// The first system the shortcut is for whose note nobody has answered yet ("Use it" or "Ignore"
+// in the editor): { platform, note }, or null. The list marks those shortcuts.
+function unanswered(shortcut) {
+  for (const p of PLATFORMS) {
+    if (shortcut.platforms !== 'all' && shortcut.platforms !== p) continue;
+    const n = note(shortcut.trigger, p);
+    if (n) return { platform: p, note: n };
+  }
+  return null;
+}
+
 // Keys to try instead of one most keyboards on `platform` lack.
 const SWAPS = { mac: { ControlRight: ['MetaRight', 'AltRight'] }, win: { MetaRight: ['ControlRight', 'AltRight'] } };
 
@@ -192,5 +204,5 @@ function warnings(trigger, platform) {
 
 module.exports = {
   PLATFORMS, TriggerError, currentPlatform, normalize, normalizeCombo, comboFor, expand, comboId,
-  forHelper, label, note, suggestOverride, warnings,
+  forHelper, label, note, unanswered, suggestOverride, warnings,
 };

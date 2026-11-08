@@ -543,6 +543,12 @@ svg.i {
   cursor: default;
 }
 
+/* a note for the other system nobody has answered yet ("Use it" or "Ignore") */
+.row.attention {
+  border-color: var(--warn);
+  background: var(--warn-soft);
+}
+
 .row.inactive .row-trigger,
 .row.inactive .row-main {
   opacity: 0.5;
@@ -1370,6 +1376,10 @@ textarea:focus {
 
 .note.warn > .ic {
   color: var(--warn);
+}
+
+.note.attention {
+  box-shadow: inset 0 0 0 1px var(--warn);
 }
 
 .note.error {

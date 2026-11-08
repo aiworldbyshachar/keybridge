@@ -85,6 +85,19 @@ test('notes and suggested overrides for keys most keyboards lack', () => {
   assert.strictEqual(t.suggestOverride(t.normalize(hotkey(['ShiftRight'], 'KeyA')), 'mac', []), null);
 });
 
+test('a note stays open in the list until "Use it" or "Ignore", for the systems the shortcut is for', () => {
+  const rc = t.normalize(hotkey(['ControlRight'], 'Digit1'));
+  assert.deepStrictEqual(t.unanswered({ platforms: 'all', trigger: rc }), { platform: 'mac', note: 'mac-no-right-control' });
+  assert.strictEqual(t.unanswered({ platforms: 'win', trigger: rc }), null, 'a Windows-only shortcut needs nothing on the Mac');
+  // "Ignore" keeps the same keys on the Mac: saved as an override equal to the hotkey, and it survives cleaning
+  const ignored = t.normalize({ ...rc, mac: { mods: ['ControlRight'], key: 'Digit1' } });
+  assert.deepStrictEqual(ignored.mac, { mods: ['ControlRight'], key: 'Digit1' });
+  assert.strictEqual(t.unanswered({ platforms: 'all', trigger: ignored }), null);
+  assert.deepStrictEqual(t.forHelper([{ id: 'a', trigger: ignored }], 'mac').hotkeys, [{ id: 'a', mods: ['ControlRight'], key: 'Digit1' }]);
+  assert.deepStrictEqual(t.unanswered({ platforms: 'all', trigger: t.normalize(hotkey(['ShiftRight'], 'F21')) }), { platform: 'mac', note: 'key-missing' });
+  assert.strictEqual(t.unanswered({ platforms: 'all', trigger: { type: 'abbrev', text: ';kb' } }), null);
+});
+
 test('warnings: system combos, everyday app shortcuts on the left key, Shift on either side', () => {
   assert.deepStrictEqual(t.warnings(hotkey(['ControlLeft', 'AltLeft'], 'Delete'), 'win'), ['system']);
   assert.deepStrictEqual(t.warnings(hotkey(['Control'], 'KeyC'), 'win'), ['common']);

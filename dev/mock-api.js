@@ -60,6 +60,19 @@
     return out;
   }
 
+  // triggers.unanswered from the main process, for the made-up hotkeys
+  function attention() {
+    const out = {};
+    for (const s of shortcuts) {
+      const t = s.trigger;
+      if (!t || t.type !== 'hotkey') continue;
+      for (const [p, mod, note] of [['win', 'MetaRight', 'win-no-right-win'], ['mac', 'ControlRight', 'mac-no-right-control']]) {
+        if (!out[s.id] && (s.platforms === 'all' || s.platforms === p) && !t[p] && t.mods.includes(mod)) out[s.id] = { platform: p, note };
+      }
+    }
+    return out;
+  }
+
   window.api = {
     platform,
     getState: async () => ({
@@ -71,6 +84,7 @@
       trashCount: trash.length,
       conflicts: conflicts(),
       invalid: {},
+      attention: attention(),
       helper: { ready: state !== 'helper-error', error: state === 'helper-error' ? 'the keyboard helper keeps stopping' : '', permission: state === 'permission' ? false : mac ? true : null },
       account: { ...account },
       clavier: { exists: !mac, count: 22 },
@@ -111,11 +125,11 @@
       const same = shortcuts.filter((s) => s.id !== id && s.trigger && s.trigger.type === 'hotkey' && s.trigger.key === trigger.key && JSON.stringify(s.trigger.mods.slice().sort()) === JSON.stringify(trigger.mods.slice().sort()));
       const notes = {};
       const suggestions = {};
-      if (trigger.mods.includes('ControlRight')) {
+      if (trigger.mods.includes('ControlRight') && !trigger.mac) {
         notes.mac = 'mac-no-right-control';
         suggestions.mac = { mods: trigger.mods.map((m) => (m === 'ControlRight' ? 'MetaRight' : m)), key: trigger.key };
       }
-      if (trigger.mods.includes('MetaRight')) {
+      if (trigger.mods.includes('MetaRight') && !trigger.win) {
         notes.win = 'win-no-right-win';
         suggestions.win = { mods: trigger.mods.map((m) => (m === 'MetaRight' ? 'ControlRight' : m)), key: trigger.key };
       }

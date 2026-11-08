@@ -283,6 +283,11 @@ function getState() {
   for (const [id, others] of engine.triggers.conflicts) conflicts[id] = [...others];
   const invalid = {};
   for (const bad of engine.triggers.invalid) invalid[bad.id] = bad.reason;
+  const attention = {};
+  for (const s of store.shortcuts()) {
+    const open = triggers.unanswered(s);
+    if (open) attention[s.id] = open;
+  }
   return {
     platform,
     version: app.getVersion(),
@@ -298,6 +303,7 @@ function getState() {
     trashCount: store.trash().length,
     conflicts,
     invalid,
+    attention,
     helper: { ...helperState },
     account: { ...account.status(), hasCode: !!account.code },
     clavier: clavierState(),

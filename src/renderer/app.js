@@ -297,6 +297,8 @@
     const flags = [];
     if (S.app.conflicts[s.id]) flags.push(h('span', { class: 'badge warn', title: t('clashWith', { names: namesOf(S.app.conflicts[s.id]) }) }, t('badgeClash')));
     if (S.app.invalid[s.id]) flags.push(h('span', { class: 'badge warn', title: t('badgeNotHereHint') }, t('badgeNotHere')));
+    const open = S.app.attention[s.id];
+    if (open) flags.push(h('span', { class: 'badge warn', title: `${noteText(open.note, open.platform)} ${t('badgeChooseHint')}` }, t('badgeChoose')));
     if (s.platforms !== 'all') flags.push(h('span', { class: 'badge' }, t(s.platforms === 'mac' ? 'scopeMacShort' : 'scopeWinShort')));
     const g = groupOf(s);
     if (g && !g.enabled) flags.push(h('span', { class: 'badge' }, t('badgeGroupOff')));
@@ -305,7 +307,7 @@
     const toggle = h('label', { class: 'toggle mini', title: t(s.enabled ? 'turnOff' : 'turnOn'), onclick: (e) => e.stopPropagation() },
       h('input', { type: 'checkbox', checked: s.enabled, 'aria-label': t('edOn'), onchange: (e) => api.enableShortcut(s.id, e.target.checked) }),
       h('span', { class: 'track' }));
-    return h('div', { class: `row${active ? '' : ' inactive'}`, role: 'button', tabindex: '0', 'aria-label': `${triggerWords(s.trigger)} - ${title}`, onclick: () => openEditor(s), onkeydown: (e) => {
+    return h('div', { class: `row${active ? '' : ' inactive'}${open ? ' attention' : ''}`, role: 'button', tabindex: '0', 'aria-label': `${triggerWords(s.trigger)} - ${title}`, onclick: () => openEditor(s), onkeydown: (e) => {
       if (e.key === 'Enter') openEditor(s);
     } },
       h('div', { class: 'row-trigger' }, triggerView(s.trigger)),
@@ -518,6 +520,14 @@
 
   const SYSTEM = { win: 'Windows', mac: 'Mac' };
 
+  function noteText(n, p) {
+    if (n === 'mac-no-right-control') return t('noteMacRightControl');
+    if (n === 'win-no-right-win') return t('noteWinRightWin');
+    return t('noteKeyMissing', { system: SYSTEM[p] });
+  }
+
+  const sameCombo = (a, b) => a.key === b.key && a.mods.join() === b.mods.join();
+
   function renderNotes() {
     const box = els.notes;
     box.replaceChildren();
@@ -532,16 +542,21 @@
       for (const p of [plat, otherPlat]) {
         const n = c.notes && c.notes[p];
         const override = trig[p];
-        if (override) {
+        if (override && sameCombo(override, trig)) {
+          // "Ignore" was chosen: the same keys there
+          box.append(note('info', t('noteKept', { system: SYSTEM[p] }), ' ', comboView(override, p), ' ',
+            h('button', { class: 'link', type: 'button', onclick: () => setOverride(p, null) }, t('noteUndo'))));
+        } else if (override) {
           box.append(note('info', t('noteOverride', { system: SYSTEM[p] }), ' ', comboView(override, p), ' ',
             h('button', { class: 'link', type: 'button', onclick: () => setOverride(p, null) }, t('noteOverrideRemove'))));
-        } else if (n === 'key-missing') {
-          box.append(note('warn', t('noteKeyMissing', { system: SYSTEM[p] })));
         } else if (n) {
-          const sug = c.suggestions && c.suggestions[p];
-          box.append(note('info', t(n === 'mac-no-right-control' ? 'noteMacRightControl' : 'noteWinRightWin'),
-            sug ? h('div', { class: 'note-action' }, t('noteUseInstead', { system: SYSTEM[p] }), ' ', comboView(sug, p), ' ',
-              h('button', { class: 'btn small', type: 'button', onclick: () => setOverride(p, sug) }, t('noteUseIt'))) : null));
+          // stays marked, here and in the list, until "Use it" or "Ignore"
+          const sug = n !== 'key-missing' && c.suggestions && c.suggestions[p];
+          box.append(note('warn attention', h('b', null, noteText(n, p)),
+            h('div', { class: 'note-action' },
+              sug ? [t('noteUseInstead', { system: SYSTEM[p] }), ' ', comboView(sug, p), ' ',
+                h('button', { class: 'btn small primary', type: 'button', onclick: () => setOverride(p, sug) }, t('noteUseIt'))] : null,
+              h('button', { class: 'btn small', type: 'button', onclick: () => setOverride(p, { mods: trig.mods, key: trig.key }) }, t('noteIgnore')))));
         }
       }
       for (const w of (c.warnings && c.warnings[plat]) || []) box.append(note('warn', t(`warn_${w.replace(/-/g, '_')}`)));
