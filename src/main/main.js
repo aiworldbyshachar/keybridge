@@ -213,7 +213,11 @@ function startAccount() {
   } catch (err) {
     log('cloud config:', err.message);
   }
-  const sealed = timed('keychain', () => safeStorage.isEncryptionAvailable())
+  // Sealed on Windows only. On the Mac the secure storage is the keychain, which - for an app
+  // without a paid signature - asks for the Mac password at the first start and after every update
+  // and holds the app until it's answered (17 s, and the page never loaded). There they stay in the
+  // user-only file next to the shortcuts, which are plain on disk anyway (the user's choice).
+  const sealed = !isMac && timed('secure storage', () => safeStorage.isEncryptionAvailable())
     ? { encrypt: (s) => safeStorage.encryptString(s), decrypt: (b) => safeStorage.decryptString(b) }
     : {};
   account = new Account({
@@ -635,7 +639,11 @@ function showWindow(then) {
     reveal();
   };
   timer = setTimeout(() => {
-    log('window: page still loading after 5 s - showing it anyway');
+    let detail = '';
+    try {
+      detail = ` (waiting for the file: ${wc.isWaitingForResponse()}; running: ${app.getAppMetrics().map((m) => m.type).join(', ')})`;
+    } catch {}
+    log(`window: page still loading after 5 s${detail} - showing it anyway`);
     once();
   }, 5000);
   wc.once('did-finish-load', once);

@@ -245,6 +245,17 @@ test('secrets: sealed by the keychain function when there is one', () => {
   assert.strictEqual(sealed.get('code'), null);
 });
 
+test('secrets: without sealing (Mac, dev CLI) only this user may read the file; a sealed one is just gone', () => {
+  const dir = tmpDir();
+  const plain = new Secrets(dir);
+  plain.set('code', 'K7QM-4XRT-P9WE');
+  assert.strictEqual(plain.get('code'), 'K7QM-4XRT-P9WE');
+  if (process.platform !== 'win32') assert.strictEqual(fs.statSync(path.join(dir, 'secrets.json')).mode & 0o777, 0o600);
+  // left by a version that sealed it with the keychain: reads as signed out, no crash
+  fs.writeFileSync(path.join(dir, 'secrets.json'), JSON.stringify({ code: Buffer.from('sealed bytes').toString('base64') }));
+  assert.strictEqual(plain.get('code'), null);
+});
+
 test('realtime: joins the account channel with the token, and a change nudges a sync', async (t) => {
   const { Realtime } = require('../src/main/realtime');
   const sent = [];

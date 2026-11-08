@@ -1,7 +1,8 @@
 'use strict';
-// The small secrets of this computer - the cloud session and the account code - in secrets.json.
-// The app seals them with the system keychain (Electron safeStorage: `encrypt` / `decrypt`); the
-// dev CLI has no keychain and keeps them as plain text in its own dev folder.
+// The small secrets of this computer - the cloud session and the account code - in secrets.json,
+// a file only this user may read. On Windows the app also seals them with the system's secure
+// storage (Electron safeStorage: `encrypt` / `decrypt`). The Mac app and the dev CLI keep them as
+// plain text in that file (main.js says why).
 const fs = require('fs');
 const path = require('path');
 
