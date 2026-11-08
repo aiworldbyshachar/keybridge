@@ -175,6 +175,9 @@
   const syncedText = (a) => (a.lastSync ? t('accSyncedAt', { when: ago(a.lastSync) }) : t('accNotSynced'));
 
   const groupOf = (s) => (s.groupId && S.app.groups.find((g) => g.id === s.groupId)) || null;
+  // the sidebar line for shortcuts outside every group (none chosen, or theirs is gone)
+  const UNASSIGNED = 'unassigned';
+  const inView = (s) => S.group === 'all' || (S.group === UNASSIGNED ? !groupOf(s) : s.groupId === S.group);
   const isActive = (s) => s.enabled && (s.platforms === 'all' || s.platforms === plat) && !(groupOf(s) && !groupOf(s).enabled);
 
   // ---------- top bar, banners ----------
@@ -230,16 +233,21 @@
     const nav = $('#groups');
     nav.replaceChildren();
     const all = S.app.shortcuts;
-    const item = (id, name, count, color, g) =>
+    const item = (id, name, count, mark, g) =>
       h('div', { class: 'group-item', 'aria-pressed': String(S.group === id) },
         h('button', { class: 'group-pick', type: 'button', onclick: () => pickGroup(id) },
-          color ? h('span', { class: `swatch${g && !g.enabled ? ' off' : ''}`, 'data-color': color }) : icon('key'),
+          mark,
           h('span', { class: 'group-name' }, name),
           h('span', { class: 'group-count' }, count)),
         g ? h('button', { class: 'icon-btn tiny', type: 'button', title: t('groupEdit'), 'aria-label': t('groupEdit'), html: svg('more'), onclick: () => openGroupDialog(g) }) : null);
-    nav.append(item('all', t('allShortcuts'), all.length));
-    for (const g of S.app.groups) nav.append(item(g.id, g.name || t('groupUnnamed'), all.filter((s) => s.groupId === g.id).length, g.color || GROUP_COLORS[0], g));
-    for (const sw of nav.querySelectorAll('.swatch')) sw.style.setProperty('--c', sw.dataset.color);
+    nav.append(item('all', t('allShortcuts'), all.length, icon('key')));
+    // without groups it would list the same as "All shortcuts"
+    if (S.app.groups.length) nav.append(item(UNASSIGNED, t('noGroup'), all.filter((s) => !groupOf(s)).length, h('span', { class: 'swatch none' })));
+    for (const g of S.app.groups) {
+      nav.append(item(g.id, g.name || t('groupUnnamed'), all.filter((s) => s.groupId === g.id).length,
+        h('span', { class: `swatch${g.enabled ? '' : ' off'}`, 'data-color': g.color || GROUP_COLORS[0] }), g));
+    }
+    for (const sw of nav.querySelectorAll('.swatch[data-color]')) sw.style.setProperty('--c', sw.dataset.color);
   }
 
   function pickGroup(id) {
@@ -281,7 +289,7 @@
 
   function visibleShortcuts() {
     const q = S.q.trim().toLocaleLowerCase(tr.code);
-    return S.app.shortcuts.filter((s) => (S.group === 'all' || s.groupId === S.group) && matches(s, q));
+    return S.app.shortcuts.filter((s) => inView(s) && matches(s, q));
   }
 
   function row(s) {
@@ -326,7 +334,7 @@
           h('button', { class: 'btn primary', type: 'button', onclick: () => openEditor(null) }, t('newShortcut')),
           S.app.clavier.exists ? h('button', { class: 'btn', type: 'button', onclick: importClavier }, t('importClavierN', { n: S.app.clavier.count })) : null)));
     } else if (!items.length) {
-      list.append(h('div', { class: 'empty' }, h('p', null, t(S.q ? 'noMatches' : 'groupEmpty'))));
+      list.append(h('div', { class: 'empty' }, h('p', null, t(S.q ? 'noMatches' : S.group === UNASSIGNED ? 'noGroupEmpty' : 'groupEmpty'))));
     } else {
       for (const s of items) list.append(row(s));
     }
@@ -354,7 +362,7 @@
   };
 
   function blankDraft() {
-    return { id: null, kind: 'text', name: '', text: '', url: '', path: { win: '', mac: '' }, args: '', trigger: null, platforms: 'all', groupId: S.group !== 'all' ? S.group : '', enabled: true };
+    return { id: null, kind: 'text', name: '', text: '', url: '', path: { win: '', mac: '' }, args: '', trigger: null, platforms: 'all', groupId: S.app.groups.some((g) => g.id === S.group) ? S.group : '', enabled: true };
   }
 
   function openEditor(s) {
@@ -931,7 +939,8 @@
       buildFormatters();
       translatePage();
     }
-    if (S.group !== 'all' && !S.app.groups.some((g) => g.id === S.group)) S.group = 'all';
+    const shown = S.group === 'all' || S.app.groups.some((g) => g.id === S.group) || (S.group === UNASSIGNED && S.app.groups.length);
+    if (!shown) S.group = 'all';
     renderTop();
     renderBanners();
     renderGroups();
