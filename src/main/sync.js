@@ -162,9 +162,12 @@ class Sync extends EventEmitter {
       const mine = local.get(row.id) || null;
       const changedHere = mine ? !known || known.hash !== hashOf(mine) : !!known;
       if (!changedHere) {
-        if (mine || remote) apply.push({ id: row.id, value: remote });
+        // a delete of something that isn't here changes nothing
+        if (mine || remote) {
+          apply.push({ id: row.id, value: remote });
+          result.pulled++;
+        }
         taken.push([row.id, row.rev]);
-        result.pulled++;
         continue;
       }
       // Both sides changed it since the last sync.

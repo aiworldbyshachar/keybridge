@@ -161,6 +161,22 @@ test('shortcuts made before signing in join the account from both computers', as
   for (const p of [pc, mac]) assert.deepStrictEqual(p.store.shortcuts().map((s) => s.text).sort(), ['made on the Mac', 'made on the PC']);
 });
 
+test('signing in again counts only what came in, not shortcuts already deleted here', async () => {
+  const { cloud, pc, mac } = pair();
+  pc.store.add({ text: 'kept', trigger: rightShift('KeyK') });
+  const gone = pc.store.add({ text: 'deleted', trigger: rightShift('KeyD') });
+  await syncAll(pc, mac);
+  pc.store.remove(gone.id);
+  await syncAll(pc, mac);
+  // signed out and back in: the sync memory is gone, the shortcuts stay
+  mac.sync.forget();
+  assert.deepStrictEqual(await mac.sync.run(), { pulled: 0, pushed: 0, conflicts: 0, unreadable: 0 });
+  // a new computer gets the shortcut and the trash entry, nothing for the deleted one
+  const third = computer(cloud, 'third', KEY);
+  assert.strictEqual((await third.sync.run()).pulled, 2);
+  assert.strictEqual(snapshot(third), snapshot(pc));
+});
+
 test('the same backup imported on both before signing in is not a conflict', async () => {
   const { pc, mac } = pair();
   const s = pc.store.add({ text: 'same' });
