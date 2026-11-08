@@ -92,6 +92,38 @@
     return el;
   }
 
+  // The account code box: the XXXX-XXXX-XXXX template shows faintly behind what's typed, letters
+  // become capitals and the hyphens come by themselves, so the cursor jumps to the next group of 4.
+  const CODE_TEMPLATE = 'XXXX-XXXX-XXXX';
+  function formatCodeInput(text, open) {
+    const n = String(text).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
+    const v = (n.match(/.{1,4}/g) || []).join('-');
+    // a full group gets its hyphen at once - but not while deleting, or backspace would be stuck
+    return open && n.length && n.length < 12 && n.length % 4 === 0 ? v + '-' : v;
+  }
+
+  function codeField() {
+    const input = h('input', { id: 'code-input', dir: 'ltr', class: 'code-input', autocomplete: 'off', spellcheck: 'false', autocapitalize: 'characters', 'aria-label': t('accCodeTitle') });
+    const typed = h('span', { class: 'typed' });
+    const rest = h('span', null, CODE_TEMPLATE);
+    const box = h('span', { class: 'code-box', dir: 'ltr' }, input, h('span', { class: 'code-ghost', 'aria-hidden': 'true' }, typed, rest));
+    input.addEventListener('input', (e) => {
+      const deleting = /^delete/.test(e.inputType || '');
+      const caret = input.selectionStart == null ? input.value.length : input.selectionStart;
+      const before = input.value.slice(0, caret).replace(/[^A-Za-z0-9]/g, '').length;
+      const v = formatCodeInput(input.value, !deleting);
+      // the cursor stays after the same letters, and hops over a hyphen that follows them
+      let pos = 0;
+      for (let seen = 0; pos < v.length && seen < before; pos++) if (v[pos] !== '-') seen++;
+      if (!deleting && v[pos] === '-') pos++;
+      input.value = v;
+      input.setSelectionRange(pos, pos);
+      typed.textContent = v;
+      rest.textContent = CODE_TEMPLATE.slice(v.length);
+    });
+    return { box, input };
+  }
+
   const $ = (sel) => document.querySelector(sel);
   const icon = (name) => h('span', { class: 'ic', html: svg(name) });
   for (const el of document.querySelectorAll('[data-icon]')) el.innerHTML = svg(el.dataset.icon);
@@ -737,7 +769,8 @@
       return;
     }
     if (a.state === 'needs-code') {
-      const code = h('input', { id: 'code-input', dir: 'ltr', class: 'code-input', placeholder: 'XXXX-XXXX-XXXX', autocomplete: 'off', spellcheck: 'false' });
+      const field = codeField();
+      const code = field.input;
       const go = h('button', { class: 'btn primary', type: 'submit' }, t('continue'));
       const msg = h('p', { class: 'msg', hidden: true });
       body.append(h('section', { class: 'group' },
@@ -753,7 +786,7 @@
             msg.className = 'msg error';
             msg.textContent = errorText(res.error);
           }
-        } }, h('div', { class: 'field-row' }, code, go), msg),
+        } }, h('div', { class: 'field-row' }, field.box, go), msg),
         h('p', { class: 'help' }, t('accCodeLost'))));
       setTimeout(() => code.focus(), 30);
       return;
