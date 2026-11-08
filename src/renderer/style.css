@@ -1201,24 +1201,28 @@ textarea:focus {
 
 /* first run */
 
+/* sized to fit the window as it first opens (940 x 640), so nothing scrolls on the first look */
 .welcome {
   text-align: center;
-  padding-top: 36px;
+  padding-top: 20px;
+  padding-bottom: 16px;
 }
 
 .welcome h1 {
-  margin: 10px 0 4px;
+  margin: 8px 0 4px;
   font-size: 24px;
   letter-spacing: -0.02em;
 }
 
 .welcome .lead {
-  margin: 0 0 22px;
+  margin: 0 0 16px;
   color: var(--muted);
 }
 
 .welcome .group {
   text-align: start;
+  margin-bottom: 10px;
+  padding: 12px 16px;
 }
 
 .welcome .step.done h3 {
@@ -1226,7 +1230,7 @@ textarea:focus {
 }
 
 .welcome .btn.big {
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 /* ---------- the editor panel ---------- */
