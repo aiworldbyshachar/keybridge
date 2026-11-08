@@ -214,7 +214,11 @@ function startAccount() {
     secrets: new Secrets(app.getPath('userData'), sealed),
     deviceName: settings.get('deviceName'),
   });
-  account.on('state', () => {
+  // a sync that changed nothing stays out of the log (one every 5 minutes); sign-in steps don't
+  let lastState = account.state;
+  account.on('state', (s) => {
+    if (s.state !== lastState) log(`account: ${s.state}`);
+    lastState = s.state;
     sendState();
     updateTrayMenu();
   });
