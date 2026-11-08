@@ -55,6 +55,16 @@ function log(...args) {
     fs.appendFileSync(logFile, line);
   } catch {}
 }
+// A startup step that takes long gets a line in the log (the Mac's keychain, login items or a first
+// check of an unsigned program can take seconds).
+function timed(name, fn) {
+  const t0 = Date.now();
+  const out = fn();
+  const ms = Date.now() - t0;
+  if (ms > 300) log(`slow: ${name} took ${ms} ms`);
+  return out;
+}
+
 process.on('uncaughtException', (err) => log('uncaught:', err));
 process.on('unhandledRejection', (err) => log('unhandled rejection:', err));
 
@@ -122,14 +132,16 @@ async function init() {
     }
   }, 6 * 3600 * 1000).unref();
 
-  startKeyboard();
-  startAccount();
+  timed('keyboard', startKeyboard);
+  timed('account', startAccount);
   setupIpc();
-  createTray();
-  applyLoginItem();
+  timed('tray', createTray);
 
-  if (settings.isFirstRun || !settings.get('onboarded') || !launchedAtLogin()) showWindow();
+  const show = settings.isFirstRun || !settings.get('onboarded') || !timed('login check', launchedAtLogin);
+  if (show) timed('window', () => showWindow());
   setTimeout(() => (acceptActivate = true), 1500);
+  // registering the login item can be slow on macOS, so it waits until the window is up
+  setTimeout(() => timed('login item', applyLoginItem), 2000);
   if (process.env.KEYBRIDGE_SCREENSHOT) captureForTesting(process.env.KEYBRIDGE_SCREENSHOT);
 }
 
@@ -158,7 +170,7 @@ function startKeyboard() {
   engine.on('ready', () => {
     helperState.ready = true;
     helperState.error = '';
-    log('keyboard helper ready');
+    log(`keyboard helper ready (${Date.now() - helper.startedAt} ms)`);
     sendState();
   });
   engine.on('permission', (allowed) => {
@@ -189,7 +201,7 @@ function startKeyboard() {
   });
   engine.start();
   engine.setPaused(settings.get('paused'));
-  helper.start();
+  timed('helper start', () => helper.start());
 }
 
 // ---------- the account ----------
@@ -201,7 +213,7 @@ function startAccount() {
   } catch (err) {
     log('cloud config:', err.message);
   }
-  const sealed = safeStorage.isEncryptionAvailable()
+  const sealed = timed('keychain', () => safeStorage.isEncryptionAvailable())
     ? { encrypt: (s) => safeStorage.encryptString(s), decrypt: (b) => safeStorage.decryptString(b) }
     : {};
   account = new Account({
@@ -307,7 +319,7 @@ function getState() {
     helper: { ...helperState },
     account: { ...account.status(), hasCode: !!account.code },
     clavier: clavierState(),
-    loginStatus: isMac && app.isPackaged ? app.getLoginItemSettings().status : null,
+    loginStatus,
   };
 }
 
@@ -529,14 +541,20 @@ function applySettings(patch) {
   return { ok: true };
 }
 
+// The Mac's login item state for Settings ("enabled", "requires-approval"...), read when it's set
+// rather than on every state request - asking macOS can be slow.
+let loginStatus = null;
+
 function applyLoginItem() {
   if (!app.isPackaged) return;
   try {
     // `args` is Windows-only; it tells this app it was started at login.
     app.setLoginItemSettings({ openAtLogin: !!settings.get('openAtLogin'), args: ['--hidden'] });
+    if (isMac) loginStatus = app.getLoginItemSettings().status || null;
   } catch (err) {
     log('login item:', err);
   }
+  sendState();
 }
 
 // Started at login (as opposed to by the user)? Windows passes --hidden; newer macOS no longer
@@ -551,6 +569,7 @@ function launchedAtLogin() {
 // ---------- window ----------
 
 function createWindow() {
+  const created = Date.now();
   win = new BrowserWindow({
     width: 940,
     height: 640,
@@ -573,6 +592,12 @@ function createWindow() {
     if (e.level === 'warning' || e.level === 'error') log(`renderer ${e.level}: ${e.message} (${e.sourceId}:${e.lineNumber})`);
   });
   win.webContents.on('render-process-gone', (_e, details) => log('renderer gone:', details.reason));
+  win.webContents.on('did-finish-load', () => log(`window: page loaded (${Date.now() - created} ms)`));
+  win.webContents.on('did-fail-load', (_e, code, desc, _url, mainFrame) => {
+    if (mainFrame) log(`window: page failed to load: ${code} ${desc}`);
+  });
+  win.webContents.on('preload-error', (_e, _file, err) => log('window: preload failed:', err));
+  win.webContents.on('unresponsive', () => log('window: page not responding'));
   win.on('close', (e) => {
     if (!quitting) {
       e.preventDefault();
@@ -592,12 +617,29 @@ function showWindow(then) {
   if (!win || win.isDestroyed()) createWindow();
   if (isMac) app.focus({ steal: true });
   const reveal = () => {
+    if (win.isDestroyed()) return;
     win.show();
     win.focus();
+    if (!win.isVisible()) log('window: show() left it hidden');
     if (then) send(then);
   };
-  if (win.webContents.isLoading()) win.webContents.once('did-finish-load', reveal);
-  else reveal();
+  if (!win.webContents.isLoading()) return reveal();
+  // shown once the page is in - or after 5 s whatever happened, so a slow or failed load never
+  // leaves an invisible window
+  const wc = win.webContents;
+  let timer = null;
+  const once = () => {
+    clearTimeout(timer);
+    wc.off('did-finish-load', once);
+    wc.off('did-fail-load', once);
+    reveal();
+  };
+  timer = setTimeout(() => {
+    log('window: page still loading after 5 s - showing it anyway');
+    once();
+  }, 5000);
+  wc.once('did-finish-load', once);
+  wc.once('did-fail-load', once);
 }
 
 function hideWindow() {

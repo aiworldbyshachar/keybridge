@@ -29,6 +29,7 @@ class Helper extends EventEmitter {
 
   start() {
     this.stopped = false;
+    this.startedAt = Date.now();
     const child = spawn(this.exe, [], { stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true });
     this.child = child;
     child.on('error', (err) => {
