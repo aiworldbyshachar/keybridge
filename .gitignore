@@ -10,8 +10,9 @@ dmg/
 /CLAUDE.md
 /planning/
 
-# the Rust keyboard helper's build output
+# the Rust keyboard helper's build output, and the cloud settings written for an installer
 native/target/
+/build/cloud.json
 
 # local working files: marketing images and the CLI demo folders
 marketing/

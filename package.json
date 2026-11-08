@@ -22,8 +22,8 @@
     "selftest": "native/target/release/keybridge-helper --selftest",
     "spike": "node dev/spike.js",
     "demo": "node dev/cli.js",
-    "dist:win": "electron-builder --win",
-    "dist:mac": "electron-builder --mac"
+    "dist:win": "node scripts/cloud-config.js && electron-builder --win --publish never",
+    "dist:mac": "bash scripts/mac-dmg.sh"
   },
   "devDependencies": {
     "electron": "43.7.11",
@@ -50,7 +50,17 @@
           ]
         }
       ],
-      "artifactName": "KeyBridge-Windows-Setup.${ext}"
+      "artifactName": "KeyBridge-Windows-Setup.${ext}",
+      "extraResources": [
+        {
+          "from": "native/target/release/keybridge-helper.exe",
+          "to": "keybridge-helper.exe"
+        },
+        {
+          "from": "build/cloud.json",
+          "to": "cloud.json"
+        }
+      ]
     },
     "nsis": {
       "oneClick": true,
@@ -74,7 +84,18 @@
       "artifactName": "KeyBridge-macOS.${ext}",
       "extendInfo": {
         "LSAppNapIsDisabled": true
-      }
+      },
+      "extraResources": [
+        {
+          "from": "native/target/universal/keybridge-helper",
+          "to": "keybridge-helper"
+        },
+        {
+          "from": "build/cloud.json",
+          "to": "cloud.json"
+        }
+      ],
+      "x64ArchFiles": "Contents/Resources/keybridge-helper"
     },
     "dmg": {
       "title": "KeyBridge"

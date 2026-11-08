@@ -210,13 +210,19 @@ test('the cloud client: PKCE, the key on every request, a wrong verifier refused
   await assert.rejects(new Cloud({ url: 'http://127.0.0.1:1', key: KEY }).sendLink('x@example.com'), (e) => e.code === 'offline');
 });
 
-test('config: from .env or the environment; the secret key is refused', () => {
+test('config: from .env, the environment or the installed app\'s cloud.json; the secret key is refused', () => {
   const dir = tmpDir();
   const file = path.join(dir, '.env');
+  const none = path.join(dir, 'none');
   fs.writeFileSync(file, '# comment\nKEYBRIDGE_SUPABASE_URL=https://abc.supabase.co/\nKEYBRIDGE_SUPABASE_KEY="sb_publishable_x"\n');
-  assert.deepStrictEqual(cloudConfig({ env: {}, envFile: file }), { url: 'https://abc.supabase.co', key: 'sb_publishable_x' });
-  assert.deepStrictEqual(cloudConfig({ env: {}, envFile: path.join(dir, 'none') }), { url: '', key: '' });
-  assert.throws(() => cloudConfig({ env: { KEYBRIDGE_SUPABASE_KEY: 'sb_secret_x' }, envFile: file }), /secret key/);
+  assert.deepStrictEqual(cloudConfig({ env: {}, envFile: file, configFile: '' }), { url: 'https://abc.supabase.co', key: 'sb_publishable_x' });
+  assert.deepStrictEqual(cloudConfig({ env: {}, envFile: none, configFile: '' }), { url: '', key: '' });
+  assert.throws(() => cloudConfig({ env: { KEYBRIDGE_SUPABASE_KEY: 'sb_secret_x' }, envFile: file, configFile: '' }), /secret key/);
+  // installed: written at build time next to the app
+  const built = path.join(dir, 'cloud.json');
+  fs.writeFileSync(built, JSON.stringify({ url: 'https://def.supabase.co', key: 'sb_publishable_y' }));
+  assert.deepStrictEqual(cloudConfig({ env: {}, envFile: none, configFile: built }), { url: 'https://def.supabase.co', key: 'sb_publishable_y' });
+  assert.throws(() => cloudConfig({ env: {}, envFile: none, configFile: (fs.writeFileSync(built, '{"url":"https://def.supabase.co","key":"sb_secret_z"}'), built) }), /secret key/);
 });
 
 test('without the project settings it works on this computer only', async () => {

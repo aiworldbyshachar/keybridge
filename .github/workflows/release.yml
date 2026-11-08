@@ -1,0 +1,75 @@
+name: Release
+
+# Push a tag like v1.0.0 to build the Windows installer and the Mac app and publish them as a
+# GitHub release (the landing page links to the latest one). Run it by hand (Actions -> Release ->
+# Run workflow) for a test build: the installers are attached to the run and nothing is published.
+#
+# The installed app signs in through the Supabase project in the repository secrets
+# KEYBRIDGE_SUPABASE_URL and KEYBRIDGE_SUPABASE_KEY (the publishable key, never the secret one).
+# While the repo is private the macOS job may never get a runner (see helper.yml).
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  KEYBRIDGE_SUPABASE_URL: ${{ secrets.KEYBRIDGE_SUPABASE_URL }}
+  KEYBRIDGE_SUPABASE_KEY: ${{ secrets.KEYBRIDGE_SUPABASE_KEY }}
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/electron/install.js
+      - run: npm test
+      - run: cargo test --manifest-path native/Cargo.toml
+      - run: cargo build --release --manifest-path native/Cargo.toml
+      - run: npm run dist:win
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: dist/KeyBridge-Windows-Setup.exe
+          if-no-files-found: error
+
+  mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/electron/install.js
+      - run: npm test
+      - run: cargo test --manifest-path native/Cargo.toml
+      # one app for Apple Silicon and Intel, signed ad hoc, in a DMG with a shortcut to Applications
+      - run: npm run dist:mac
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac
+          path: dist/KeyBridge-macOS.dmg
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [windows, mac]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+          generate_release_notes: true
