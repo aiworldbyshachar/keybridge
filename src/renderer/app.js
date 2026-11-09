@@ -770,13 +770,13 @@
         go.disabled = true;
         msg.hidden = true;
         const res = await api.enterEmailCode(code.value);
+        // accepted: the next screen is on its way, so the button stays off (a second press would be refused)
+        if (res.ok) { code.readOnly = true; return; }
         go.disabled = false;
-        if (!res.ok) {
-          msg.hidden = false;
-          msg.className = 'msg error';
-          msg.textContent = errorText(res.error);
-          code.select();
-        }
+        msg.hidden = false;
+        msg.className = 'msg error';
+        msg.textContent = errorText(res.error);
+        code.select();
       };
       code.addEventListener('input', () => {
         const digits = code.value.replace(/\D/g, '').slice(0, 6);
