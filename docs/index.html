@@ -7,7 +7,7 @@
   <meta name="description" content="Free, open-source text shortcuts and hotkeys for Mac and Windows, with left and right modifier keys as different keys. Your shortcuts on every computer you sign in to, locked so only you can read them.">
   <meta property="og:title" content="KeyBridge - press it once, it's typed">
   <meta property="og:description" content="Free, open-source text shortcuts and hotkeys for Mac and Windows, with left and right modifier keys as different keys, on every computer you sign in to.">
-  <meta property="og:image" content="https://aiworldbyshachar.github.io/keybridge/media/shortcuts.jpg?v=1">
+  <meta property="og:image" content="https://aiworldbyshachar.github.io/keybridge/media/hero.jpg?v=1">
   <meta property="og:url" content="https://aiworldbyshachar.github.io/keybridge/">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="media/icon-128.png">
@@ -54,8 +54,10 @@
     .btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
     .meta { font-size: 14px; color: var(--faint); }
     .meta a { color: var(--muted); }
-    .hero-art { border-radius: 18px; background: var(--desk); padding: 24px; box-shadow: 0 30px 60px rgba(22, 22, 44, 0.12); }
-    .hero-art img { display: block; width: 100%; height: auto; border-radius: 10px; border: 1px solid rgba(25, 25, 35, 0.08); box-shadow: 0 18px 40px rgba(60, 40, 20, 0.18); }
+    .hero-art { position: relative; border-radius: 18px; overflow: hidden; background: var(--desk); box-shadow: 0 30px 60px rgba(22, 22, 44, 0.12); }
+    .hero-art img { display: block; width: 100%; height: auto; }
+    .video { border-radius: 18px; overflow: hidden; background: #000; box-shadow: 0 30px 60px rgba(22, 22, 44, 0.16); }
+    .video video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; }
     .kbd { display: inline-flex; align-items: baseline; gap: 4px; padding: 0 8px; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 7px; background: var(--surface); font: 600 0.88em var(--font); color: var(--ink); white-space: nowrap; }
     .kbd small { font-size: 0.82em; font-weight: 600; color: var(--accent); }
 
@@ -121,7 +123,6 @@
       .hero, .steps, .feature, .install, .more-list { grid-template-columns: 1fr; }
       .feature:nth-of-type(even) .shot { order: 0; }
       .hero { padding-top: 18px; }
-      .hero-art { padding: 14px; }
     }
     @media (max-width: 480px) {
       .top a.gh .long { display: none; }
@@ -146,13 +147,19 @@
         </div>
         <div class="meta">Windows 10/11 · macOS 12+ (Apple Silicon &amp; Intel) · <a href="https://github.com/aiworldbyshachar/keybridge/releases">all releases</a> · MIT licence</div>
       </div>
-      <div class="hero-art"><img src="media/shortcuts.jpg?v=1" alt="The KeyBridge window: shortcuts like Right Shift + E for an email address, Left Shift + P for a phone number and ;sig for a signature, in groups" width="1880" height="1280"></div>
+      <div class="hero-art"><img src="media/hero.jpg?v=1" alt="KeyBridge on a MacBook and on a PC: the same shortcuts on both, joined by the KeyBridge bridge" width="1600" height="900"></div>
     </div>
 
     <div class="rule" role="note">
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="13" rx="2.5"/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M8 15h8"/></svg>
       <div><b>The one rule: sign in on each computer.</b><span>Your email once, and your code once on every new computer - then every change reaches all of them within seconds. Without signing in, KeyBridge works fully, on that one computer.</span></div>
     </div>
+
+    <section id="demo">
+      <h2>See it in 85 seconds</h2>
+      <p class="sub">From typing your email twenty times a day to pressing one key - on your Mac and your PC.</p>
+      <div class="video"><video controls playsinline preload="metadata" poster="media/poster.jpg?v=1" src="media/keybridge-demo.mp4?v=1"></video></div>
+    </section>
 
     <section id="how">
       <h2>Make them once. Use them everywhere.</h2>

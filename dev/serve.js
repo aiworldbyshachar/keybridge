@@ -14,6 +14,7 @@ const types = {
   '.js': 'text/javascript',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
+  '.mp4': 'video/mp4',
   '.svg': 'image/svg+xml',
 };
 

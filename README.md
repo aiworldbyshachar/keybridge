@@ -6,13 +6,13 @@
 Free, open-source text shortcuts and hotkeys for Mac and Windows - with left and right Shift, Ctrl, Alt and Win / Cmd as different keys, and your shortcuts on each computer you sign in to, locked so only you can read them.</p>
 
 <p align="center">
-  <a href="https://aiworldbyshachar.github.io/keybridge/">Website</a> ·
+  <a href="https://aiworldbyshachar.github.io/keybridge/">Website &amp; demo video</a> ·
   <a href="https://github.com/aiworldbyshachar/keybridge/releases/latest/download/KeyBridge-Windows-Setup.exe">Download for Windows</a> ·
   <a href="https://github.com/aiworldbyshachar/keybridge/releases/latest/download/KeyBridge-macOS.dmg">Download for Mac</a> ·
   <a href="README.he.md">עברית</a>
 </p>
 
-<p align="center"><a href="https://aiworldbyshachar.github.io/keybridge/"><img src="docs/media/shortcuts.jpg" width="760" alt="The KeyBridge window: shortcuts like Right Shift + E for an email address, Left Shift + P for a phone number and ;sig for a signature, in groups"></a></p>
+<p align="center"><a href="https://aiworldbyshachar.github.io/keybridge/#demo"><img src="docs/media/poster.jpg" width="760" alt="KeyBridge demo video - Right Shift + E types a whole email address into a sign-up form, Left Shift + E is still just E"></a></p>
 
 ---
 

@@ -5,7 +5,7 @@
 **לחיצה אחת. וזה מוקלד.** בכל מחשב שמחובר לחשבון שלך.
 קיצורי טקסט וקיצורי מקלדת ל-Mac ול-Windows, חינם ובקוד פתוח. Shift, Ctrl, Alt ו-Win / Cmd הימניים והשמאליים הם מקשים שונים, והקיצורים שלך נמצאים בכל מחשב שמחובר לחשבון, נעולים כך שרק אתה יכול לקרוא אותם.
 
-[אתר](https://aiworldbyshachar.github.io/keybridge/) · [הורדה ל-Windows](https://github.com/aiworldbyshachar/keybridge/releases/latest/download/KeyBridge-Windows-Setup.exe) · [הורדה ל-Mac](https://github.com/aiworldbyshachar/keybridge/releases/latest/download/KeyBridge-macOS.dmg) · [English](README.md)
+[אתר וסרטון הדגמה](https://aiworldbyshachar.github.io/keybridge/) · [הורדה ל-Windows](https://github.com/aiworldbyshachar/keybridge/releases/latest/download/KeyBridge-Windows-Setup.exe) · [הורדה ל-Mac](https://github.com/aiworldbyshachar/keybridge/releases/latest/download/KeyBridge-macOS.dmg) · [English](README.md)
 
 <p align="center"><a href="https://aiworldbyshachar.github.io/keybridge/"><img src="docs/media/hebrew.jpg" width="760" alt="חלון KeyBridge בעברית: קיצורים כמו Shift ימני + E למייל, Shift שמאלי + P לטלפון ו-;sig לחתימה, בקבוצות"></a></p>
 

@@ -43,9 +43,19 @@ were not built.
 - `font_face_local_only`: UI text is Segoe UI via `local()`, so renders are made on Windows. No font files in git.
 - The first frame shows the PC monitor's right edge 9 px past the frame while the camera settles (as FolderBridge).
 
+## The render (v1, 2026-11-09, after the user's OK)
+- renders/keybridge-demo-v1.mp4: 1920x1080, 30 fps, 85.5 s, 26 MB, rendered in 4 m 34 s on this PC. Twelve frames
+  pulled from the file match the preview.
+- Sound (`hyperframes audio`): -17.1 LUFS, true peak -1.5 dBTP, no clipping. Quiet stretches: 0-0.56 s (before
+  the voice), 36.96-37.85 s (the planned breath at the cut to sign-in), and 82.1 s to the end - the music's last
+  chord has decayed, so the end card's last 3.4 s are near-silent after the Download click (FolderBridge's music
+  ran to the end; listen for it).
+- Web copy docs/media/keybridge-demo.mp4: two-pass loudnorm to -16.0 LUFS, true peak -1.4 dBFS after AAC, libx264
+  crf 23 slow, fast start, AAC 160k 48 kHz, 11.6 MB. Stills: poster.jpg (29.6 s, Right Shift + E with the address
+  landed), hero.jpg (44.22 s, both computers, same list, the bridge), 1600x900.
+
 ## Not checked
 - The sound was measured (peaks placed one frame after their pictures, music levels as FolderBridge), not heard.
-- No delivery render yet: waiting for the user to watch the preview.
 
 ## Weakest shot
 The privacy keyboard (63.5-66.4 s) is busy for 3 s: a field, a panel and 29 keys. With more time: drop the
