@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KeyBridge - press it once, it's typed</title>
+  <meta name="description" content="Free, open-source text shortcuts and hotkeys for Mac and Windows, with left and right modifier keys as different keys. Your shortcuts on every computer you sign in to, locked so only you can read them.">
+  <meta property="og:title" content="KeyBridge - press it once, it's typed">
+  <meta property="og:description" content="Free, open-source text shortcuts and hotkeys for Mac and Windows, with left and right modifier keys as different keys, on every computer you sign in to.">
+  <meta property="og:image" content="https://aiworldbyshachar.github.io/keybridge/media/shortcuts.jpg?v=1">
+  <meta property="og:url" content="https://aiworldbyshachar.github.io/keybridge/">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="media/icon-128.png">
+  <style>
+    :root {
+      --ground: #f5f5f8; --surface: #ffffff; --surface-2: #efeff5; --border: #e3e3eb;
+      --ink: #191923; --muted: #5f5f70; --faint: #8b8b9a;
+      --accent: #5550d8; --accent-strong: #4440c2; --accent-soft: #ebebfd;
+      --ok: #16925a; --ok-soft: #e3f5ec; --warn: #a3640a; --warn-soft: #fcf2e0;
+      --desk: #f1ece4;
+      --font: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      --mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --ground: #14141b; --surface: #1c1c25; --surface-2: #252531; --border: #2c2c38;
+        --ink: #ececf3; --muted: #a8a8ba; --faint: #7a7a8c;
+        --accent: #8d89f7; --accent-strong: #a6a3ff; --accent-soft: #29284a;
+        --ok: #3fcf8e; --ok-soft: #173327; --warn: #f0b44c; --warn-soft: #382c16; --desk: #1a1a21;
+      }
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--ground); color: var(--ink); font: 17px/1.6 var(--font); -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent); }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+    header.top { display: flex; align-items: center; gap: 12px; padding: 18px 0; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 19px; color: var(--ink); text-decoration: none; margin-inline-end: auto; }
+    .brand img { width: 32px; height: 32px; }
+    .top a.gh { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); text-decoration: none; font-size: 15px; }
+    .top a.gh:hover { color: var(--ink); }
+    .top a.gh svg { width: 20px; height: 20px; fill: currentColor; }
+    .top a.gh svg.stroke { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+    .hero { padding: 40px 0 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+    .hero h1 { margin: 0 0 14px; font-size: clamp(36px, 5.4vw, 60px); line-height: 1.05; letter-spacing: -0.025em; }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero p.lead { margin: 0 0 26px; font-size: 20px; color: var(--muted); max-width: 32em; }
+    .dl { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
+    .btn { display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 22px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); font: 600 16px var(--font); text-decoration: none; }
+    .btn:hover { border-color: var(--accent); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn.primary:hover { background: var(--accent-strong); }
+    .btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+    .meta { font-size: 14px; color: var(--faint); }
+    .meta a { color: var(--muted); }
+    .hero-art { border-radius: 18px; background: var(--desk); padding: 24px; box-shadow: 0 30px 60px rgba(22, 22, 44, 0.12); }
+    .hero-art img { display: block; width: 100%; height: auto; border-radius: 10px; border: 1px solid rgba(25, 25, 35, 0.08); box-shadow: 0 18px 40px rgba(60, 40, 20, 0.18); }
+    .kbd { display: inline-flex; align-items: baseline; gap: 4px; padding: 0 8px; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 7px; background: var(--surface); font: 600 0.88em var(--font); color: var(--ink); white-space: nowrap; }
+    .kbd small { font-size: 0.82em; font-weight: 600; color: var(--accent); }
+
+    .rule { margin: 26px 0 8px; display: flex; gap: 16px; align-items: center; padding: 18px 22px; border-radius: 16px; background: var(--accent-soft); color: var(--ink); }
+    .rule svg { flex: none; width: 44px; height: 44px; fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .rule b { display: block; font-size: 18px; }
+    .rule span { color: var(--muted); font-size: 15.5px; }
+
+    section { padding: 56px 0 8px; }
+    section h2 { font-size: clamp(28px, 3.6vw, 38px); line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 10px; }
+    section p.sub { margin: 0 0 28px; color: var(--muted); font-size: 18px; max-width: 40em; }
+
+    .steps { counter-reset: s; display: grid; grid-template-columns: 1fr 1fr; gap: 22px 36px; align-items: center; }
+    .step-list { list-style: none; margin: 0; padding: 0; }
+    .step-list li { counter-increment: s; position: relative; padding: 0 0 22px 54px; }
+    .step-list li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 700; }
+    .step-list b { display: block; font-size: 18px; }
+    .step-list span { color: var(--muted); }
+    .shot { border-radius: 16px; overflow: hidden; border: 1px solid var(--border); background: var(--surface); }
+    .shot img { display: block; width: 100%; height: auto; }
+
+    .feature { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: center; padding: 26px 0; border-top: 1px solid var(--border); }
+    .feature:nth-of-type(even) .shot { order: -1; }
+    .feature h3 { margin: 0 0 8px; font-size: 24px; letter-spacing: -0.01em; }
+    .feature p { margin: 0; color: var(--muted); }
+    .feature ul { margin: 10px 0 0; padding-left: 20px; color: var(--muted); }
+    .feature li { margin-bottom: 4px; }
+
+    .install { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .card { min-width: 0; padding: 22px 24px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+    .card code { overflow-wrap: anywhere; }
+    .steps > *, .feature > *, .hero > * { min-width: 0; }
+    .card h3 { margin: 0 0 10px; display: flex; align-items: center; gap: 10px; font-size: 20px; }
+    .card h3 svg { width: 26px; height: 26px; fill: none; stroke: var(--muted); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+    .card ol { margin: 0; padding-left: 20px; }
+    .card li { margin-bottom: 8px; }
+    code, .cmd { font-family: var(--mono); font-size: 0.9em; background: var(--surface-2); padding: 2px 6px; border-radius: 6px; }
+    .cmd { display: block; padding: 10px 12px; margin: 6px 0; overflow-x: auto; white-space: nowrap; }
+    .note { margin-top: 12px; padding: 12px 14px; border-radius: 10px; background: var(--warn-soft); color: var(--ink); font-size: 15px; }
+
+    details { border-top: 1px solid var(--border); padding: 14px 0; }
+    details summary { cursor: pointer; font-weight: 600; font-size: 17px; }
+    details p { margin: 8px 0 0; color: var(--muted); }
+
+    .more-list { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 900px; }
+    .more { display: flex; align-items: center; gap: 18px; padding: 18px 22px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); color: var(--ink); text-decoration: none; }
+    .more:hover { border-color: var(--accent); }
+    .more img { width: 56px; height: 56px; flex: none; }
+    .more b { display: block; font-size: 18px; }
+    .more span { color: var(--muted); font-size: 15.5px; }
+
+    .support { margin-top: 56px; display: flex; flex-wrap: wrap; align-items: center; gap: 20px 28px; padding: 28px 30px; border-radius: 18px; background: var(--accent-soft); }
+    .support > svg { flex: none; width: 56px; height: 56px; fill: none; stroke: var(--accent); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .support div { flex: 1 1 320px; }
+    .support h2 { font-size: 26px; margin: 0 0 4px; }
+    .support p { margin: 0; color: var(--muted); }
+
+    footer { margin-top: 60px; padding: 28px 0 40px; border-top: 1px solid var(--border); color: var(--faint); font-size: 14px; display: flex; flex-wrap: wrap; gap: 10px 22px; }
+    footer a { color: var(--muted); }
+    .all { margin: 14px 0 0; font-weight: 600; }
+
+    @media (max-width: 820px) {
+      .hero, .steps, .feature, .install, .more-list { grid-template-columns: 1fr; }
+      .feature:nth-of-type(even) .shot { order: 0; }
+      .hero { padding-top: 18px; }
+      .hero-art { padding: 14px; }
+    }
+    @media (max-width: 480px) {
+      .top a.gh .long { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="./"><img src="media/icon-128.png" alt="">KeyBridge</a>
+      <a class="gh" href="https://github.com/aiworldbyshachar/keybridge"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span class="long">Source on </span>GitHub</a>
+      <a class="gh" href="https://ko-fi.com/aiworldbyshachar"><svg class="stroke" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3.5c-.8 1 .8 2 0 3M12 3.5c-.8 1 .8 2 0 3"/></svg>Support</a>
+    </header>
+
+    <div class="hero">
+      <div>
+        <h1>Press it once.<br>It's <em>typed</em>.</h1>
+        <p class="lead">KeyBridge types your email, your address and your links with one key combination, on your Mac and your Windows PC. <span class="kbd"><small>Right</small>Shift</span> + <span class="kbd">A</span> can type your address while <span class="kbd"><small>Left</small>Shift</span> + <span class="kbd">A</span> is still a capital A. On every computer you sign in to, locked so only you can read them. Free and open source.</p>
+        <div class="dl">
+          <a class="btn primary" id="dl-win" href="https://github.com/aiworldbyshachar/keybridge/releases/latest/download/KeyBridge-Windows-Setup.exe"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Download for Windows</a>
+          <a class="btn" id="dl-mac" href="https://github.com/aiworldbyshachar/keybridge/releases/latest/download/KeyBridge-macOS.dmg"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Download for Mac</a>
+        </div>
+        <div class="meta">Windows 10/11 · macOS 12+ (Apple Silicon &amp; Intel) · <a href="https://github.com/aiworldbyshachar/keybridge/releases">all releases</a> · MIT licence</div>
+      </div>
+      <div class="hero-art"><img src="media/shortcuts.jpg?v=1" alt="The KeyBridge window: shortcuts like Right Shift + E for an email address, Left Shift + P for a phone number and ;sig for a signature, in groups" width="1880" height="1280"></div>
+    </div>
+
+    <div class="rule" role="note">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="13" rx="2.5"/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M8 15h8"/></svg>
+      <div><b>The one rule: sign in on each computer.</b><span>Your email once, and your code once on every new computer - then every change reaches all of them within seconds. Without signing in, KeyBridge works fully, on that one computer.</span></div>
+    </div>
+
+    <section id="how">
+      <h2>Make them once. Use them everywhere.</h2>
+      <div class="steps">
+        <ol class="step-list">
+          <li><b>Install KeyBridge and make your shortcuts</b><span>The Windows installer or the Mac app from the buttons above. New shortcut, press the keys, write what they type. It works right away - no account needed.</span></li>
+          <li><b>Sign in with your email</b><span>No password: KeyBridge emails you a link - open it on the same computer. You get your code, like <code>K7QM-4XRT-P9WE</code>. Write it down.</span></li>
+          <li><b>On your other computers, sign in and type the code</b><span>Your shortcuts appear. Change one anywhere, and it's changed everywhere.</span></li>
+        </ol>
+        <div class="shot"><img src="media/code.jpg?v=1" alt="KeyBridge shows the account code K7QM-4XRT-P9WE: write it down, you type it once on each new computer" width="1880" height="1280" loading="lazy"></div>
+      </div>
+    </section>
+
+    <section id="features">
+      <h2>Small app. Everything you need.</h2>
+      <div class="feature">
+        <div><h3>Right and left are different keys</h3><p>Record the keys by pressing them, and KeyBridge shows exactly which side you used. So Right Shift + A can type your address while Left Shift + A is still just a capital A.</p><ul><li>Shift, Ctrl, Alt and Win / Cmd, each side on its own - or either side.</li><li>Or an abbreviation: type <code>;sig</code> and Space, and it's your signature. It fires on the English and the Hebrew layout alike.</li><li>Type text, open a link, a folder or a file, or start a program. Text can hold the date, the time, the clipboard, and where the cursor ends up.</li><li>Long text is pasted, and your clipboard comes back right after.</li></ul></div>
+        <div class="shot"><img src="media/editor.jpg?v=1" alt="The KeyBridge editor: the keys Right Shift + E, and the text they type" width="1880" height="1280" loading="lazy"></div>
+      </div>
+      <div class="feature">
+        <div><h3>The same shortcuts on your Mac</h3><p>Sign in on your Mac and your PC and they share every shortcut. Keys are matched by what they do: Right Alt on Windows is Right Option on the Mac, Right Win is Right Cmd.</p><ul><li>Right Cmd + C can type text while Left Cmd + C still copies.</li><li>Most Mac keyboards have no Right Control - KeyBridge tells you, and suggests a key that's free.</li><li>A shortcut can work on all your computers, or only on Windows or only on the Mac.</li></ul></div>
+        <div class="shot"><img src="media/mac.jpg?v=1" alt="The same shortcuts on the Mac: Right Cmd + 1 and Right Option + C instead of Right Ctrl and Right Alt" width="1880" height="1280" loading="lazy"></div>
+      </div>
+      <div class="feature">
+        <div><h3>Only you can read them</h3><p>Your shortcuts are locked on your computer with a code only you have, before they go anywhere. The server keeps them locked - not even I can read them.</p><ul><li>KeyBridge never records what you type. It only knows when one of your shortcuts was pressed.</li><li>See all your computers, and sign out one you no longer have.</li><li>No account? Then nothing leaves your computer. <a href="privacy.html">What's stored where</a></li></ul></div>
+        <div class="shot"><img src="media/account.jpg?v=1" alt="The KeyBridge account: signed in, your code hidden until you ask, and your two computers" width="1440" height="1280" loading="lazy"></div>
+      </div>
+      <div class="feature">
+        <div><h3>Nothing is ever lost</h3><p>Deleted shortcuts, and versions replaced by an import or by another computer, wait in the Trash for 30 days. One click restores them on every computer.</p><ul><li>Changed the same shortcut on two computers before they could sync? The later change wins, and the other one is kept as “Older version”.</li></ul></div>
+        <div class="shot"><img src="media/trash.jpg?v=1" alt="The KeyBridge trash: a deleted shortcut, an older version from another computer and a deleted group, each with Restore" width="1440" height="600" loading="lazy"></div>
+      </div>
+      <div class="feature">
+        <div><h3>Bring your shortcuts along</h3><p>Coming from Clavier+ on Windows? KeyBridge finds your shortcuts and brings them in with their left and right keys. Export everything to a file whenever you like.</p><ul><li>Opens at login and lives quietly in the tray or the menu bar.</li><li>Pause all shortcuts with one click - for games or remote desktop.</li></ul></div>
+        <div class="shot"><img src="media/settings.jpg?v=1" alt="KeyBridge settings: language, open at login, pause, and Import from Clavier+ with 22 shortcuts found" width="1440" height="1280" loading="lazy"></div>
+      </div>
+      <div class="feature">
+        <div><h3>Speaks your language</h3><p>English, עברית, Español, Français, Русский and العربية - with full right-to-left layouts for Hebrew and Arabic. Your text is typed exactly as you wrote it, in any language.</p></div>
+        <div class="shot"><img src="media/hebrew.jpg?v=1" alt="The KeyBridge window in Hebrew, right to left, with Hebrew shortcut names" width="1880" height="1280" loading="lazy"></div>
+      </div>
+    </section>
+
+    <section id="install">
+      <h2>Install</h2>
+      <p class="sub">KeyBridge isn't signed with paid Apple/Microsoft certificates, so both systems ask once before opening it.</p>
+      <div class="install">
+        <div class="card">
+          <h3><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8.5 20h7M12 16v4"/></svg>Windows</h3>
+          <ol>
+            <li>Run <code>KeyBridge-Windows-Setup.exe</code>.</li>
+            <li>If you see “Windows protected your PC”, click <b>More info</b> → <b>Run anyway</b>.</li>
+            <li>KeyBridge opens, and from then on starts quietly with Windows.</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19.5h20"/></svg>Mac</h3>
+          <ol>
+            <li>Open <code>KeyBridge-macOS.dmg</code> and drag KeyBridge into Applications.</li>
+            <li>Open it once. If macOS says it can't verify it, go to <b>System Settings → Privacy &amp; Security</b> and click <b>Open Anyway</b>.</li>
+            <li>Allow KeyBridge under <b>Privacy &amp; Security → Accessibility</b> - the window has a button that takes you there. That's what lets it see your shortcuts.</li>
+          </ol>
+          <div class="note">If macOS says the app “is damaged”, run this once in Terminal:<span class="cmd">xattr -cr /Applications/KeyBridge.app</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <h2>Questions</h2>
+      <details><summary>Does KeyBridge see what I type?</summary><p>No. A small helper watches for your shortcuts and tells the app only that one of them was pressed. For abbreviations it keeps the last few keys in memory, to compare them - never on disk, never sent anywhere. The log never contains what you type.</p></details>
+      <details><summary>Do I need an account?</summary><p>No. Without one, KeyBridge works fully and everything stays on your computer. The account only adds your shortcuts on your other computers.</p></details>
+      <details><summary>What's stored in the cloud?</summary><p>Your email address, your shortcuts locked with your code, and a short list of your computers (their names locked too). Nobody can read the shortcuts without your code - not even me. Delete your account in the app and it's all gone. <a href="privacy.html">The privacy page</a> has every detail.</p></details>
+      <details><summary>What if I lose my code?</summary><p>Any computer that's still signed in shows it again: Account → Show my code. Since nobody else has it, it can't be reset - so write it down when you first see it. An export to a file is a good extra backup.</p></details>
+      <details><summary>Does it work in every app?</summary><p>In nearly all of them: browsers, Word, Notepad, TextEdit, terminals. Two exceptions: on Windows, apps run as administrator (like Task Manager) are kept apart from normal apps; on the Mac, password fields block every app that watches the keyboard, on purpose.</p></details>
+      <details><summary>Will it get in the way of normal typing?</summary><p>Only the exact keys you choose are taken: Right Shift + A can be a shortcut while Left Shift + A still types A. KeyBridge warns you when keys are used by the system or by another shortcut, and one click pauses everything for games or remote desktop.</p></details>
+      <details><summary>I use Clavier+.</summary><p>KeyBridge offers to bring your shortcuts in the first time it starts, and later in Settings → Import from Clavier+. They keep their left and right keys. Anything it can't do yet comes in switched off, with the reason.</p></details>
+      <details><summary>Is it really free?</summary><p>Yes. KeyBridge is open source under the MIT licence. No ads, no tracking.</p></details>
+    </section>
+
+    <section id="more">
+      <h2>More free tools</h2>
+      <p class="sub">Small tools that make everyday work easier, by AI World by Shachar.</p>
+      <div class="more-list">
+        <a class="more" href="https://aiworldbyshachar.github.io/clipbridge/"><img src="media/clipbridge-128.png" alt=""><div><b>ClipBridge</b><span>Copy on your Mac, paste on your PC - with one shared clipboard history.</span></div></a>
+        <a class="more" href="https://aiworldbyshachar.github.io/folderbridge/"><img src="media/folderbridge-128.png" alt=""><div><b>FolderBridge</b><span>Save on your Mac, open on your PC - one folder, identical on both.</span></div></a>
+      </div>
+      <p class="all"><a href="https://aiworldbyshachar.github.io/">All my free tools →</a></p>
+    </section>
+
+    <section class="support" id="support">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3.5c-.8 1 .8 2 0 3M12 3.5c-.8 1 .8 2 0 3"/></svg>
+      <div>
+        <h2>Enjoying KeyBridge?</h2>
+        <p>It's free and always will be. If it saves you time, you can buy me a coffee. It helps me keep building free tools like this one.</p>
+      </div>
+      <a class="btn primary" href="https://ko-fi.com/aiworldbyshachar"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Buy me a coffee on Ko-fi</a>
+    </section>
+
+    <footer>
+      <span>KeyBridge - a small gift to anyone who types the same things every day.</span>
+      <a href="https://github.com/aiworldbyshachar/keybridge">GitHub</a>
+      <a href="https://github.com/aiworldbyshachar/keybridge/issues">Report an issue</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="https://github.com/aiworldbyshachar/keybridge/blob/main/LICENSE">MIT licence</a>
+      <a href="https://aiworldbyshachar.github.io/">More tools</a>
+      <a href="https://ko-fi.com/aiworldbyshachar">Support on Ko-fi</a>
+    </footer>
+  </div>
+  <script>
+    // Put the visitor's own platform first.
+    if (/Mac/i.test(navigator.platform || navigator.userAgent)) {
+      const win = document.getElementById('dl-win'), mac = document.getElementById('dl-mac');
+      win.classList.remove('primary'); mac.classList.add('primary'); mac.parentNode.insertBefore(mac, win);
+    }
+  </script>
+</body>
+</html>
