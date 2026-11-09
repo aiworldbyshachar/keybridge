@@ -4,7 +4,8 @@ const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 
-const css = fs.readFileSync(path.join(__dirname, '..', 'src', 'renderer', 'style.css'), 'utf8');
+// CRLF on a Windows checkout (git's autocrlf) - the selectors below are matched with "\n"
+const css = fs.readFileSync(path.join(__dirname, '..', 'src', 'renderer', 'style.css'), 'utf8').replace(/\r\n/g, '\n');
 const rule = (selector) => {
   const m = new RegExp(`(?:^|\\n)${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} \\{([^}]*)\\}`).exec(css);
   return m ? m[1] : '';
