@@ -1,0 +1,172 @@
+<template>
+  <link rel="stylesheet" href="assets/ui.css">
+  <link rel="stylesheet" href="assets/kb.css">
+  <style>
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI"); font-weight: 400; }
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI Semibold"); font-weight: 600; }
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI Bold"); font-weight: 700; }
+    @font-face { font-family: "CB Mono"; src: local("Consolas"); font-weight: 400; }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #f1ece4; }
+    .p-world { position: absolute; inset: 0; }
+    .p-world .mac-wall, .p-world .pc-wall { position: absolute; inset: 0; }
+    #p-menubar { position: absolute; left: 0; top: 0; width: 960px; transform: scale(2); transform-origin: 0 0; }
+    #p-menubar .tray { width: 15px; height: 15px; border-radius: 3px; }
+
+    /* A. the Mac's mail reply: ;sig + Space */
+    #p-mail { left: 260px; top: 130px; width: 1400px; height: 700px; border-radius: 16px; }
+    #p-mail .win-bar { height: 52px; font-size: 22px; padding: 0 20px; }
+    #p-mail .dots i { width: 16px; height: 16px; }
+    #p-mail .field-line { font-size: 30px; padding: 14px 30px; }
+    #p-mail .field-line b { width: 130px; color: #66666e; }
+    #p-body { padding: 30px; font: 400 34px/1.6 "CB Sans"; color: #1d1d1f; }
+    #p-sig { white-space: pre-line; }
+    #p-body .caret { height: 40px; width: 3px; }
+    .p-keys { position: absolute; left: 0; right: 0; display: flex; justify-content: center; align-items: center; gap: 28px; }
+    #p-space { min-width: 420px; }
+
+    /* B. the PC: a link, a folder and a program, each opened by its keys */
+    #p-cal { left: 90px; top: 260px; width: 900px; height: 600px; border-radius: 14px; }
+    #p-cal .win-bar, #p-files .win-bar, #p-calc .win-bar { height: 46px; font-size: 20px; padding: 0 18px; }
+    #p-cal .addr { height: 46px; display: flex; align-items: center; padding: 0 18px; background: #f4f4f6; border-bottom: 1px solid #e6e6ea; }
+    #p-cal .addr span { padding: 4px 18px; border-radius: 16px; background: #fff; border: 1px solid #e2e2e8; font: 400 20px "CB Sans"; color: #444; }
+    #p-cal h4 { margin: 18px 26px 10px; font: 700 30px "CB Sans"; color: #1d1d1f; }
+    .week { position: absolute; left: 26px; right: 26px; top: 196px; bottom: 26px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+    .week > div { position: relative; border-radius: 10px; background: #f3f4f8; }
+    .week b { position: absolute; left: 12px; top: 8px; font: 600 20px "CB Sans"; color: #66666e; }
+    .week i { position: absolute; left: 8px; right: 8px; border-radius: 8px; display: block; }
+    #p-files { left: 1030px; top: 560px; width: 800px; height: 340px; border-radius: 14px; }
+    #p-files .frow { display: flex; align-items: center; gap: 16px; padding: 12px 26px; font: 400 26px "CB Sans"; color: #1d1d1f; border-bottom: 1px solid #f0f0f3; }
+    #p-files .frow svg { width: 34px; height: 34px; flex: none; }
+    #p-files .frow .sz { margin-left: auto; color: #66666e; font-size: 22px; }
+    #p-calc { left: 1430px; top: 60px; width: 360px; height: 456px; border-radius: 14px; background: #f3f3f3; }
+    #p-calc .disp { padding: 14px 24px 10px; text-align: right; font: 600 56px "CB Sans"; color: #1d1d1f; }
+    #p-calc .pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 0 16px; }
+    #p-calc .pad span { height: 52px; border-radius: 8px; background: #fff; display: grid; place-items: center; font: 600 26px "CB Sans"; color: #1d1d1f; }
+    #p-calc .pad span.op { background: #e9e9ef; }
+    #p-calc .pad span.eq { background: #2f6fd6; color: #fff; }
+
+    /* C. the real KeyBridge Trash at 1.6x */
+    #p-trash { left: 208px; top: 28px; }
+  </style>
+
+  <div id="root" data-composition-id="depth" data-width="1920" data-height="1080">
+    <!-- A. the Mac -->
+    <div id="p-a" class="p-world">
+      <div class="mac-wall"></div>
+      <div id="p-menubar" class="mac-menubar"><span style="font-weight: 400">File</span><span style="font-weight: 400">Edit</span><span style="font-weight: 400">View</span>
+        <span class="right"><img class="tray" src="assets/img/icon-128.png" alt=""><span>Thu 9:41</span></span></div>
+      <div id="p-mail" class="win">
+        <div class="win-bar"><span class="dots"><i></i><i></i><i></i></span><span>Re: Thursday</span></div>
+        <div class="field-line"><b>To</b>noa@example.com</div>
+        <div class="field-line"><b>Subject</b>Re: Thursday</div>
+        <div id="p-body">Hi Noa,<br>Thursday works for me. See you there!<br><br><span id="p-abbr" data-text=""></span><span id="p-sig" data-text=""></span><i id="p-caret" class="caret"></i></div>
+      </div>
+      <div class="p-keys" style="top: 870px"><div id="p-space" class="fkey big">Space</div></div>
+    </div>
+
+    <!-- B. the PC -->
+    <div id="p-b" class="p-world">
+      <div class="pc-wall"></div>
+      <div id="p-cal" class="win">
+        <div class="win-bar pcbar"><span>Team calendar</span><span style="letter-spacing: 16px; color: #666">-☐✕</span></div>
+        <div class="addr"><span>calendar.example.com/team</span></div>
+        <h4>This week</h4>
+        <div class="week">
+          <div><b>Mon</b><i style="top: 46px; height: 70px; background: #c9d8f7"></i><i style="top: 170px; height: 110px; background: #d6ecdf"></i></div>
+          <div><b>Tue</b><i style="top: 90px; height: 90px; background: #f3dfc4"></i></div>
+          <div><b>Wed</b><i style="top: 46px; height: 60px; background: #c9d8f7"></i><i style="top: 200px; height: 70px; background: #e5d6f3"></i></div>
+          <div><b>Thu</b><i style="top: 120px; height: 120px; background: #ebebfd; outline: 3px solid #5550d8"></i></div>
+          <div><b>Fri</b><i style="top: 60px; height: 80px; background: #d6ecdf"></i></div>
+        </div>
+      </div>
+      <div id="p-files" class="win">
+        <div class="win-bar pcbar"><span>Invoices</span><span style="letter-spacing: 16px; color: #666">-☐✕</span></div>
+        <div class="frow"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z" fill="#e7505a"/><path d="M14 3v4h4" fill="#f4a3a8"/></svg>invoice-1043.pdf<span class="sz">Nov 6</span></div>
+        <div class="frow"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z" fill="#e7505a"/><path d="M14 3v4h4" fill="#f4a3a8"/></svg>invoice-1042.pdf<span class="sz">Oct 29</span></div>
+        <div class="frow"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z" fill="#e7505a"/><path d="M14 3v4h4" fill="#f4a3a8"/></svg>invoice-1041.pdf<span class="sz">Oct 21</span></div>
+        <div class="frow"><svg viewBox="0 0 24 24"><path d="M3 6h7l2 2h9v11H3z" fill="#f2b33d"/></svg>2026<span class="sz">Folder</span></div>
+      </div>
+      <div id="p-calc" class="win">
+        <div class="win-bar pcbar"><span>Calculator</span><span style="letter-spacing: 16px; color: #666">-☐✕</span></div>
+        <div class="disp">0</div>
+        <div class="pad"><span class="op">%</span><span class="op">CE</span><span class="op">C</span><span class="op">÷</span><span>7</span><span>8</span><span>9</span><span class="op">×</span><span>4</span><span>5</span><span>6</span><span class="op">-</span><span>1</span><span>2</span><span>3</span><span class="op">+</span><span>±</span><span>0</span><span>.</span><span class="eq">=</span></div>
+      </div>
+      <div id="p-keys-c" class="p-keys" style="top: 90px">
+        <div id="p-ralt" class="fkey big mod"><span class="side">Right</span><span>Alt</span></div><span class="fplus">+</span><div id="p-c" class="fkey big">C</div>
+      </div>
+    </div>
+
+    <!-- C. the real Trash -->
+    <div id="p-trash" class="kbw"><!-- ui:win-trash --><div class="kb" dir="ltr" lang="en"><!-- the shortcut editor, a panel over the list -->
+  <section class="sheet" data-i18n-aria="trash" aria-label="Trash" data-id="trash">
+    <header class="sheet-head">
+      <button class="icon-btn flip-ltr" type="button" data-i18n-title="back" data-icon="back" title="Back" aria-label="Back" data-id="close-trash"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+      <h2 data-i18n="trash">Trash</h2>
+    </header>
+    <div class="sheet-body narrow">
+      <p class="help" data-i18n="trashHelp">Deleted shortcuts, and versions replaced by an import or by another computer, stay here for 30 days.</p>
+      <div class="trash-list" data-id="trash-list"><div class="row static"><div class="row-trigger"><span class="combo" dir="ltr"><kbd class="cap"><small>Left</small><span>Shift</span></kbd><span class="plus">+</span><kbd class="cap key"><span>O</span></kbd></span></div><div class="row-main"><b><bdi>Old phone</bdi></b><small>Deleted · 40 minutes ago</small></div><button class="btn small" type="button">Restore</button><button class="btn small danger" type="button" data-label="forget">Delete forever</button></div><div class="row static"><div class="row-trigger"><span class="combo" dir="ltr"><kbd class="cap"><small>Right</small><span>Shift</span></kbd><span class="plus">+</span><kbd class="cap key"><span>A</span></kbd></span></div><div class="row-main"><b><bdi>Home address</bdi></b><small>Older version · Nov 8, 2026, 11:12 AM</small></div><button class="btn small" type="button">Restore</button><button class="btn small danger" type="button" data-label="forget">Delete forever</button></div><div class="row static"><div class="row-trigger"><span class="ic"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h4.2l2 2H19a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5z"></path></svg></span></div><div class="row-main"><b>Group “Old project”</b><small>with 2 shortcuts</small></div><button class="btn small" type="button">Restore</button><button class="btn small danger" type="button" data-label="forget">Delete forever</button></div></div>
+    </div>
+  </section>
+  <div class="toast" role="status" aria-live="polite" data-id="toast"></div></div><!-- /ui --></div>
+
+    <svg id="p-cursor" class="cursor" viewBox="0 0 22 32"><path d="M2 2 L2 26 L8 20 L12 30 L16 28 L12 18.5 L20 18.5 Z" fill="#111" stroke="#fff" stroke-width="2" stroke-linejoin="round" /></svg>
+  </div>
+
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // Text, classes and values change through tweens that state both sides, so any seek (back or forth,
+    // or a scene shown again) lands on the right state. "Empty" is a zero-width space, never "".
+    const ZW = "\u200b";
+    const swap = (sel, attr, from, to, t) =>
+      tl.fromTo(sel, { attr: { [attr]: from || ZW } }, { attr: { [attr]: to || ZW }, duration: 0.001, ease: "none", immediateRender: false }, t);
+    const SIG = "Best regards,\nDana Levi\nExample Ltd.";
+    // Scene time = film time - 46.5
+    const down = (sel, t) => tl.to(sel, { y: 7, borderBottomWidth: 1, duration: 0.067, ease: "power2.out" }, t);
+    const up = (sel, t) => tl.to(sel, { y: 0, borderBottomWidth: 7, duration: 0.1, ease: "power2.out" }, t);
+    const pop = (sel, t) => tl.fromTo(sel, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: "expo.out" }, t);
+    const ROW2 = "#p-trash .trash-list .row:nth-child(2)";
+
+    gsap.set(["#p-b", "#p-trash", "#p-space", "#p-keys-c", "#p-cal", "#p-files", "#p-calc"], { opacity: 0 });
+    gsap.set("#p-trash", { scale: 1.6 });
+    gsap.set('#p-trash [data-id="toast"]', { attr: { "data-text": ZW, class: "toast" } });
+    gsap.set(["#p-abbr", "#p-sig"], { attr: { "data-text": ZW } });
+    gsap.set("#p-cursor", { x: 1500, y: 1120 });
+
+    // A. "Type a short word for your whole signature"
+    tl.fromTo("#p-mail", { scale: 1.03, filter: "blur(6px)" }, { scale: 1, filter: "blur(0px)", duration: 0.4, ease: "expo.out" }, 0);
+    ";sig".split("").forEach((c, i) => swap("#p-abbr", "data-text", ";sig".slice(0, i), ";sig".slice(0, i + 1), 0.7 + i * 0.08));
+    tl.fromTo("#p-space", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.35, ease: "expo.out" }, 1.2);
+    down("#p-space", 1.82);
+    swap("#p-abbr", "data-text", ";sig", "", 1.9);
+    swap("#p-sig", "data-text", "", SIG, 1.9);
+    up("#p-space", 2.05);
+    tl.to("#p-space", { opacity: 0, y: 20, duration: 0.2, ease: "power3.in" }, 2.7);
+
+    // B. "Open a link, a folder or a program with one key"
+    tl.to("#p-a", { opacity: 0, filter: "blur(10px)", duration: 0.2, ease: "power3.in" }, 3.0);
+    tl.fromTo("#p-b", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, 3.05);
+    tl.fromTo("#p-keys-c", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.35, ease: "expo.out" }, 3.1);
+    down("#p-ralt", 3.4);
+    down("#p-c", 3.55);
+    pop("#p-cal", 3.62);
+    up("#p-c", 3.75);
+    up("#p-ralt", 3.85);
+    tl.to("#p-keys-c", { opacity: 0, y: -20, duration: 0.2, ease: "power3.in" }, 4.1);
+    pop("#p-files", 4.3);
+    pop("#p-calc", 5.11);
+
+    // C. "And nothing you delete is ever lost": the Trash, Restore
+    tl.to("#p-b", { opacity: 0, filter: "blur(10px)", duration: 0.22, ease: "power3.in" }, 6.85);
+    tl.fromTo("#p-trash", { opacity: 0, scale: 1.68, filter: "blur(8px)" }, { opacity: 1, scale: 1.6, filter: "blur(0px)", duration: 0.45, ease: "expo.out" }, 6.95);
+    tl.to("#p-cursor", { x: 1222, y: 318, duration: 0.5, ease: "expo.out" }, 7.35);
+    tl.to(`${ROW2} button:first-of-type`, { scale: 0.95, duration: 0.067, yoyo: true, repeat: 1, ease: "power2.out" }, 7.9);
+    tl.to(ROW2, { opacity: 0, x: 40, duration: 0.2, ease: "power3.in" }, 8.0);
+    tl.to("#p-trash .trash-list .row:nth-child(3)", { y: -65, duration: 0.25, ease: "power2.inOut" }, 8.2);
+    tl.to("#p-cursor", { opacity: 0, duration: 0.2 }, 8.3);
+    swap('#p-trash [data-id="toast"]', "class", "toast", "toast show", 8.66);
+    swap('#p-trash [data-id="toast"]', "data-text", "", "Restored", 8.66);
+
+    window.__timelines["depth"] = tl;
+  </script>
+</template>

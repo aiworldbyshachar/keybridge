@@ -1,0 +1,187 @@
+<template>
+  <link rel="stylesheet" href="assets/ui.css">
+  <style>
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI"); font-weight: 400; }
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI Semibold"); font-weight: 600; }
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI Bold"); font-weight: 700; }
+    @font-face { font-family: "CB Mono"; src: local("Consolas"); font-weight: 400; }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #f1ece4; }
+    #d-world { position: absolute; inset: 0; }
+    .mac-screen .dim, .pc-screen .dim { position: absolute; inset: 0; background: #000; }
+
+    /* Mac: a mail reply, the To field waiting */
+    #d-mail { left: 70px; top: 46px; width: 574px; height: 340px; }
+    #d-mail .field-line { font-size: 15px; padding: 8px 16px; align-items: center; }
+    #d-mail .field-line b { width: 64px; color: #66666e; }
+    #d-mail .body { padding: 16px; font: 400 15px/1.55 "CB Sans"; color: #333; }
+
+    /* PC: a browser with a sign-up form */
+    #d-browser { left: 18px; top: 12px; width: 732px; height: 368px; }
+    #d-browser .addr { height: 34px; display: flex; align-items: center; padding: 0 12px; background: #f4f4f6; border-bottom: 1px solid #e6e6ea; }
+    #d-browser .addr span { height: 22px; line-height: 22px; padding: 0 14px; border-radius: 11px; background: #fff; border: 1px solid #e2e2e8; font: 400 12px "CB Sans"; color: #555; }
+    .form { width: 360px; margin: 16px auto 0; font-family: "CB Sans"; }
+    .form h3 { font: 700 20px "CB Sans"; color: #1d1d1f; margin: 0 0 12px; }
+    .form label { display: block; font: 600 12px "CB Sans"; color: #66666e; margin: 0 0 4px; }
+    .form .in { height: 36px; display: flex; align-items: center; padding: 0 12px; border: 1px solid #d7d7de; border-radius: 8px; background: #fff; font: 400 15px "CB Sans"; color: #1d1d1f; margin: 0 0 12px; white-space: nowrap; }
+    .form .in.focus { border-color: #2f6fd6; box-shadow: 0 0 0 3px #dbe7fb; }
+    .form .go { display: inline-block; margin-top: 4px; padding: 8px 18px; border-radius: 8px; background: #2f6fd6; color: #fff; font: 600 14px "CB Sans"; }
+
+    #d-bridge { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+    .arm { position: absolute; left: 965px; top: 325px; width: 0; height: 0; }
+    .arm .rider { position: absolute; left: -265px; top: 0; width: 0; height: 0; }
+    #d-cap, #d-ride { position: absolute; left: 0; top: 0; }
+    #d-icon { position: absolute; left: 0; top: 0; width: 200px; height: 200px; }
+    #d-word { position: absolute; left: 0; top: 462px; height: 160px; font-size: 136px; line-height: 1; white-space: nowrap; }
+    #d-times { left: 0; top: 0; }
+    #d-times svg { fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+
+  <div id="root" data-composition-id="desk" data-width="1920" data-height="1080">
+    <div id="d-world" class="world-desk" data-layout-allow-overflow>
+      <div id="d-stage" class="stage" data-layout-allow-overflow>
+        <div class="wall"></div>
+        <div class="desk-top"></div>
+
+        <!-- MacBook Air -->
+        <div class="mac-lid">
+          <div class="mac-screen">
+            <div class="mac-wall"></div>
+            <div class="mac-menubar"><span style="font-weight: 400">File</span><span style="font-weight: 400">Edit</span><span style="font-weight: 400">View</span>
+              <span class="right"><span>Thu 9:41</span></span></div>
+            <div id="d-mail" class="win">
+              <div class="win-bar"><span class="dots"><i></i><i></i><i></i></span><span>Re: Thursday</span></div>
+              <div class="field-line"><b>To</b>noa@example.com</div>
+              <div class="field-line"><b>Subject</b>Re: Thursday</div>
+              <div class="body">Hi Noa,<br><br>Thursday works for me.<br>You can reach me at <span id="d-to" data-text=""></span><i id="d-to-caret" class="caret"></i></div>
+            </div>
+            <div id="d-mac-dim" class="dim"></div>
+          </div>
+          <div class="mac-notch"></div>
+        </div>
+        <div class="mac-base"><div class="mac-scoop"></div></div>
+
+        <!-- PC monitor -->
+        <div class="pc-bezel">
+          <div class="pc-screen">
+            <div class="pc-wall"></div>
+            <div id="d-browser" class="win">
+              <div class="win-bar pcbar" style="height: 30px"><span>Create your account</span><span style="letter-spacing: 12px; color: #666">-☐✕</span></div>
+              <div class="addr"><span>example.com/signup</span></div>
+              <div class="form">
+                <h3>Create your account</h3>
+                <label>Name</label><div class="in">Dana Levi</div>
+                <label>Email</label><div id="d-email-box" class="in focus"><span id="d-email" data-text=""></span><i id="d-email-caret" class="caret"></i></div>
+                <label>Password</label><div class="in">••••••••••</div>
+                <span class="go">Create account</span>
+              </div>
+            </div>
+            <div class="pc-taskbar"><i></i><i></i><i></i><i></i><span class="clock">9:41</span></div>
+            <div id="d-pc-dim" class="dim"></div>
+          </div>
+        </div>
+        <div class="pc-neck"></div>
+        <div class="pc-foot"></div>
+
+        <!-- the bridge: an arch centred at (965, 325), radius 265, from the Mac screen to the PC screen -->
+        <svg id="d-bridge" viewBox="0 0 1920 1080">
+          <path id="d-bridge-path" d="M 700 330 A 265 265 0 1 1 1230 330" pathLength="1" fill="none" stroke="#5550d8" stroke-width="12" stroke-linecap="round" stroke-dasharray="1 1" />
+        </svg>
+
+        <!-- one key: it drops between the computers... -->
+        <div id="d-cap" class="fkey mod"><span class="side">Right</span><span>Shift</span></div>
+        <!-- ...and rides the bridge -->
+        <div id="d-arm" class="arm"><div id="d-rider" class="rider">
+          <div id="d-ride" class="fkey mod"><span class="side">Right</span><span>Shift</span></div>
+        </div></div>
+      </div>
+      <div class="grain"></div>
+    </div>
+
+    <!-- frame space -->
+    <div id="d-times" class="chip"><svg viewBox="0 0 24 24"><path d="M17 2l4 4-4 4" /><path d="M3 11V9a3 3 0 0 1 3-3h15" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v2a3 3 0 0 1-3 3H3" /></svg>20 times a day</div>
+    <img id="d-icon" src="assets/img/icon-1024.png" alt="">
+    <div id="d-word" class="display">KeyBridge</div>
+  </div>
+
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // Text, classes and values change through tweens that state both sides, so any seek (back or forth,
+    // or a scene shown again) lands on the right state. "Empty" is a zero-width space, never "".
+    const ZW = "\u200b";
+    const swap = (sel, attr, from, to, t) =>
+      tl.fromTo(sel, { attr: { [attr]: from || ZW } }, { attr: { [attr]: to || ZW }, duration: 0.001, ease: "none", immediateRender: false }, t);
+    const SIG = "Best regards,\nDana Levi\nExample Ltd.";
+    // Camera: put stage point (cx, cy) at the frame centre at scale s.
+    const cam = (t, cx, cy, s, d, ease) =>
+      tl.to("#d-stage", { x: 960 - cx * s, y: 540 - cy * s, scale: s, duration: d, ease: ease || "power2.inOut" }, t);
+    // A person typing: one letter every `per` seconds.
+    const type = (sel, text, t0, per) => {
+      for (let i = 1; i <= text.length; i++) swap(sel, "data-text", text.slice(0, i - 1), text.slice(0, i), t0 + i * per);
+    };
+    const press = (sel, t) => tl.to(sel, { y: "+=6", borderBottomWidth: 1, duration: 0.067, yoyo: true, repeat: 1, ease: "power2.out" }, t);
+    const ADDRESS = "dana.levi@example.com";
+
+    // Stage: the Mac screen's origin is (163, 273), the PC screen's (1026, 176).
+    // PC Email field: about (1410, 412). Mac reply: "You can reach me at" line about (249-560, 515).
+
+    // ----- initial state: the world before KeyBridge -----
+    gsap.set(["#d-email", "#d-to"], { attr: { "data-text": ZW } });
+    gsap.set("#d-email-box", { attr: { class: "in focus" } });
+    gsap.set("#d-stage", { transformOrigin: "0 0", x: 960 - 960 * 1.14, y: 540 - 455 * 1.14, scale: 1.14 });
+    gsap.set(["#d-mac-dim", "#d-pc-dim"], { opacity: 0.3 });
+    gsap.set(["#d-icon", "#d-word", "#d-times", "#d-cap", "#d-ride", "#d-to-caret"], { opacity: 0 });
+    gsap.set("#d-bridge-path", { strokeDashoffset: 1 });
+    gsap.set("#d-bridge", { opacity: 0 });
+    gsap.set("#d-arm", { rotation: -1.08 });
+    gsap.set("#d-rider", { rotation: 1.08 });
+    gsap.set("#d-ride", { xPercent: -50, yPercent: -50, scale: 0.8 });
+    gsap.set("#d-times", { x: 960, y: 880, xPercent: -50 });
+
+    // ----- S1: two computers, one desk -----
+    cam(0, 960, 455, 1.1, 2.6);
+    tl.to("#d-mac-dim", { opacity: 0, duration: 0.35, ease: "power2.out" }, 2.7);
+    tl.to("#d-pc-dim", { opacity: 0, duration: 0.35, ease: "power2.out" }, 3.94);
+
+    // "one email address you type twenty times a day": on the PC, letter by letter
+    cam(4.6, 1410, 400, 1.75, 0.9);
+    type("#d-email", ADDRESS, 5.5, 0.055);
+    tl.fromTo("#d-times", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power2.out" }, 6.63);
+    tl.to("#d-times", { opacity: 0, filter: "blur(6px)", duration: 0.2, ease: "power3.in" }, 7.9);
+
+    // "Letter... by letter": and again on the Mac, slower
+    cam(7.95, 420, 515, 1.85, 0.9);
+    swap("#d-email-box", "class", "in focus", "in", 7.95);
+    tl.set("#d-email-caret", { opacity: 0 }, 7.95);
+    tl.set("#d-to-caret", { opacity: 1 }, 8.3);
+    type("#d-to", ADDRESS, 8.45, 0.1);
+
+    // ----- S3 (the detours overlay covers 11.3-21.4): what if one key could just type it? -----
+    cam(11.3, 960, 455, 1.12, 0.01);
+    // hidden while the old-way overlay covers it, back just before the overlay leaves
+    tl.set("#d-world", { opacity: 0 }, 11.6);
+    tl.set("#d-world", { opacity: 1 }, 21.0);
+    tl.set("#d-to-caret", { opacity: 0 }, 11.3);
+    // "one key": it drops onto the desk between the computers
+    tl.fromTo("#d-cap", { opacity: 0, x: 875, y: 470, scale: 1.1 }, { opacity: 1, y: 628, scale: 1.25, duration: 0.55, ease: "expo.out" }, 22.18);
+    // "type it for you": it presses once
+    press("#d-cap", 23.45);
+    // "On every computer": it hops to the Mac's end of the bridge, the bridge draws, and it rides across
+    tl.to("#d-cap", { x: 625, y: 282, scale: 0.8, duration: 0.45, ease: "power2.inOut" }, 24.45);
+    tl.set("#d-bridge", { opacity: 1 }, 24.86);
+    tl.to("#d-bridge-path", { strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" }, 24.86);
+    tl.set("#d-cap", { opacity: 0 }, 24.9);
+    tl.set("#d-ride", { opacity: 1 }, 24.9);
+    tl.to("#d-arm", { rotation: 181.08, duration: 0.85, ease: "power2.inOut" }, 25.2);
+    tl.to("#d-rider", { rotation: -181.08, duration: 0.85, ease: "power2.inOut" }, 25.2);
+    tl.to("#d-ride", { opacity: 0, scale: 0.4, duration: 0.2, ease: "power3.in" }, 26.1);
+
+    // "This is KeyBridge": the apex becomes the icon, the desk falls away, the name wipes in
+    // the apex is stage (965, 60): at scale 1.12 around y 455 that is frame (965.6, 97.6)
+    tl.fromTo("#d-icon", { opacity: 0, x: 965.6 - 100, y: 97.6 - 100, scale: 0 }, { opacity: 1, scale: 0.4, duration: 0.35, ease: "expo.out" }, 26.5);
+    tl.to("#d-icon", { x: 523, y: 440, scale: 1, duration: 0.55, ease: "power2.inOut" }, 26.85);
+    tl.to("#d-world", { opacity: 0, filter: "blur(14px)", duration: 0.35, ease: "power2.in" }, 26.81);
+    tl.fromTo("#d-word", { opacity: 1, x: 759, clipPath: "inset(0% 100% 0% 0%)" }, { opacity: 1, x: 759, clipPath: "inset(0% 0% 0% 0%)", duration: 0.45, ease: "expo.out" }, 27.06);
+
+    window.__timelines["desk"] = tl;
+  </script>
+</template>

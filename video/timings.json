@@ -1,0 +1,1066 @@
+{
+ "duration": 80.48,
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Two computers. One desk. A Mac... and a PC.",
+   "start": 0,
+   "end": 3.92,
+   "words": [
+    {
+     "text": "Two",
+     "start": 0,
+     "end": 0.16
+    },
+    {
+     "text": "computers.",
+     "start": 0.216,
+     "end": 0.8
+    },
+    {
+     "text": "One",
+     "start": 0.92,
+     "end": 1.28
+    },
+    {
+     "text": "desk.",
+     "start": 1.36,
+     "end": 1.76
+    },
+    {
+     "text": "A",
+     "start": 1.92,
+     "end": 2.08
+    },
+    {
+     "text": "Mac...",
+     "start": 2.2,
+     "end": 3.04
+    },
+    {
+     "text": "and",
+     "start": 3.08,
+     "end": 3.2
+    },
+    {
+     "text": "a",
+     "start": 3.24,
+     "end": 3.28
+    },
+    {
+     "text": "PC.",
+     "start": 3.44,
+     "end": 3.92
+    }
+   ]
+  },
+  {
+   "id": "stuck",
+   "text": "And one email address you type twenty times a day. Letter... by letter.",
+   "start": 4.14,
+   "end": 9.6,
+   "words": [
+    {
+     "text": "And",
+     "start": 4.14,
+     "end": 4.56
+    },
+    {
+     "text": "one",
+     "start": 4.62,
+     "end": 4.8
+    },
+    {
+     "text": "email",
+     "start": 4.867,
+     "end": 5.2
+    },
+    {
+     "text": "address",
+     "start": 5.25,
+     "end": 5.6
+    },
+    {
+     "text": "you",
+     "start": 5.64,
+     "end": 5.76
+    },
+    {
+     "text": "type",
+     "start": 5.824,
+     "end": 6.08
+    },
+    {
+     "text": "twenty",
+     "start": 6.126,
+     "end": 6.4
+    },
+    {
+     "text": "times",
+     "start": 6.453,
+     "end": 6.72
+    },
+    {
+     "text": "a",
+     "start": 6.76,
+     "end": 6.8
+    },
+    {
+     "text": "day.",
+     "start": 6.88,
+     "end": 7.28
+    },
+    {
+     "text": "Letter...",
+     "start": 7.429,
+     "end": 8.88
+    },
+    {
+     "text": "by",
+     "start": 8.96,
+     "end": 9.12
+    },
+    {
+     "text": "letter.",
+     "start": 9.177,
+     "end": 9.6
+    }
+   ]
+  },
+  {
+   "id": "detours",
+   "text": "So you keep it in a note, and copy it from there. Type it again... one letter wrong. And on a new computer? You start all over.",
+   "start": 11.173,
+   "end": 20.2,
+   "words": [
+    {
+     "text": "So",
+     "start": 11.173,
+     "end": 11.28
+    },
+    {
+     "text": "you",
+     "start": 11.3,
+     "end": 11.36
+    },
+    {
+     "text": "keep",
+     "start": 11.408,
+     "end": 11.6
+    },
+    {
+     "text": "it",
+     "start": 11.653,
+     "end": 11.76
+    },
+    {
+     "text": "in",
+     "start": 11.787,
+     "end": 11.84
+    },
+    {
+     "text": "a",
+     "start": 11.88,
+     "end": 11.92
+    },
+    {
+     "text": "note,",
+     "start": 12,
+     "end": 12.48
+    },
+    {
+     "text": "and",
+     "start": 12.52,
+     "end": 12.64
+    },
+    {
+     "text": "copy",
+     "start": 12.704,
+     "end": 12.96
+    },
+    {
+     "text": "it",
+     "start": 12.987,
+     "end": 13.04
+    },
+    {
+     "text": "from",
+     "start": 13.072,
+     "end": 13.2
+    },
+    {
+     "text": "there.",
+     "start": 13.253,
+     "end": 13.6
+    },
+    {
+     "text": "Type",
+     "start": 13.808,
+     "end": 14.64
+    },
+    {
+     "text": "it",
+     "start": 14.667,
+     "end": 14.72
+    },
+    {
+     "text": "again...",
+     "start": 14.8,
+     "end": 15.76
+    },
+    {
+     "text": "one",
+     "start": 15.8,
+     "end": 15.92
+    },
+    {
+     "text": "letter",
+     "start": 15.966,
+     "end": 16.24
+    },
+    {
+     "text": "wrong.",
+     "start": 16.307,
+     "end": 16.8
+    },
+    {
+     "text": "And",
+     "start": 17,
+     "end": 17.6
+    },
+    {
+     "text": "on",
+     "start": 17.653,
+     "end": 17.76
+    },
+    {
+     "text": "a",
+     "start": 17.8,
+     "end": 17.84
+    },
+    {
+     "text": "new",
+     "start": 17.9,
+     "end": 18.08
+    },
+    {
+     "text": "computer?",
+     "start": 18.142,
+     "end": 18.72
+    },
+    {
+     "text": "You",
+     "start": 18.86,
+     "end": 19.28
+    },
+    {
+     "text": "start",
+     "start": 19.333,
+     "end": 19.6
+    },
+    {
+     "text": "all",
+     "start": 19.64,
+     "end": 19.76
+    },
+    {
+     "text": "over.",
+     "start": 19.84,
+     "end": 20.2
+    }
+   ]
+  },
+  {
+   "id": "whatif",
+   "text": "What if one key could just... type it for you? On every computer?",
+   "start": 20.416,
+   "end": 25.28,
+   "words": [
+    {
+     "text": "What",
+     "start": 20.416,
+     "end": 21.12
+    },
+    {
+     "text": "if",
+     "start": 21.173,
+     "end": 21.28
+    },
+    {
+     "text": "one",
+     "start": 21.36,
+     "end": 21.6
+    },
+    {
+     "text": "key",
+     "start": 21.68,
+     "end": 21.92
+    },
+    {
+     "text": "could",
+     "start": 21.947,
+     "end": 22.08
+    },
+    {
+     "text": "just...",
+     "start": 22.16,
+     "end": 22.88
+    },
+    {
+     "text": "type",
+     "start": 22.928,
+     "end": 23.12
+    },
+    {
+     "text": "it",
+     "start": 23.147,
+     "end": 23.2
+    },
+    {
+     "text": "for",
+     "start": 23.26,
+     "end": 23.44
+    },
+    {
+     "text": "you?",
+     "start": 23.5,
+     "end": 23.84
+    },
+    {
+     "text": "On",
+     "start": 24,
+     "end": 24.32
+    },
+    {
+     "text": "every",
+     "start": 24.36,
+     "end": 24.56
+    },
+    {
+     "text": "computer?",
+     "start": 24.631,
+     "end": 25.28
+    }
+   ]
+  },
+  {
+   "id": "reveal",
+   "text": "This is KeyBridge.",
+   "start": 25.904,
+   "end": 27.2,
+   "words": [
+    {
+     "text": "This",
+     "start": 25.904,
+     "end": 26.32
+    },
+    {
+     "text": "is",
+     "start": 26.373,
+     "end": 26.48
+    },
+    {
+     "text": "KeyBridge.",
+     "start": 26.56,
+     "end": 27.2
+    }
+   ]
+  },
+  {
+   "id": "core",
+   "text": "Right Shift and E... there it is. Left Shift and E? Still just a capital E. Left and right are different keys.",
+   "start": 27.667,
+   "end": 36.4,
+   "words": [
+    {
+     "text": "Right",
+     "start": 27.667,
+     "end": 28
+    },
+    {
+     "text": "Shift",
+     "start": 28.067,
+     "end": 28.4
+    },
+    {
+     "text": "and",
+     "start": 28.42,
+     "end": 28.48
+    },
+    {
+     "text": "E...",
+     "start": 28.68,
+     "end": 29.2
+    },
+    {
+     "text": "there",
+     "start": 29.227,
+     "end": 29.36
+    },
+    {
+     "text": "it",
+     "start": 29.413,
+     "end": 29.52
+    },
+    {
+     "text": "is.",
+     "start": 29.627,
+     "end": 30
+    },
+    {
+     "text": "Left",
+     "start": 30.192,
+     "end": 30.96
+    },
+    {
+     "text": "Shift",
+     "start": 31.013,
+     "end": 31.28
+    },
+    {
+     "text": "and",
+     "start": 31.3,
+     "end": 31.36
+    },
+    {
+     "text": "E?",
+     "start": 31.56,
+     "end": 31.84
+    },
+    {
+     "text": "Still",
+     "start": 31.987,
+     "end": 32.72
+    },
+    {
+     "text": "just",
+     "start": 32.768,
+     "end": 32.96
+    },
+    {
+     "text": "a",
+     "start": 33,
+     "end": 33.04
+    },
+    {
+     "text": "capital",
+     "start": 33.09,
+     "end": 33.44
+    },
+    {
+     "text": "E.",
+     "start": 33.64,
+     "end": 34
+    },
+    {
+     "text": "Left",
+     "start": 34.176,
+     "end": 34.88
+    },
+    {
+     "text": "and",
+     "start": 34.92,
+     "end": 35.04
+    },
+    {
+     "text": "right",
+     "start": 35.093,
+     "end": 35.36
+    },
+    {
+     "text": "are",
+     "start": 35.38,
+     "end": 35.44
+    },
+    {
+     "text": "different",
+     "start": 35.472,
+     "end": 35.76
+    },
+    {
+     "text": "keys.",
+     "start": 35.872,
+     "end": 36.4
+    }
+   ]
+  },
+  {
+   "id": "signin",
+   "text": "On your Mac, sign in and type your code once. Every shortcut is there. The only rule: sign in on each computer.",
+   "start": 36.773,
+   "end": 45.2,
+   "words": [
+    {
+     "text": "On",
+     "start": 36.773,
+     "end": 37.36
+    },
+    {
+     "text": "your",
+     "start": 37.392,
+     "end": 37.52
+    },
+    {
+     "text": "Mac,",
+     "start": 37.62,
+     "end": 38.08
+    },
+    {
+     "text": "sign",
+     "start": 38.144,
+     "end": 38.4
+    },
+    {
+     "text": "in",
+     "start": 38.453,
+     "end": 38.56
+    },
+    {
+     "text": "and",
+     "start": 38.6,
+     "end": 38.72
+    },
+    {
+     "text": "type",
+     "start": 38.768,
+     "end": 38.96
+    },
+    {
+     "text": "your",
+     "start": 38.992,
+     "end": 39.12
+    },
+    {
+     "text": "code",
+     "start": 39.184,
+     "end": 39.44
+    },
+    {
+     "text": "once.",
+     "start": 39.536,
+     "end": 40
+    },
+    {
+     "text": "Every",
+     "start": 40.133,
+     "end": 40.8
+    },
+    {
+     "text": "shortcut",
+     "start": 40.862,
+     "end": 41.36
+    },
+    {
+     "text": "is",
+     "start": 41.413,
+     "end": 41.52
+    },
+    {
+     "text": "there.",
+     "start": 41.587,
+     "end": 42.28
+    },
+    {
+     "text": "The",
+     "start": 42.37,
+     "end": 42.64
+    },
+    {
+     "text": "only",
+     "start": 42.704,
+     "end": 42.96
+    },
+    {
+     "text": "rule:",
+     "start": 43.024,
+     "end": 43.68
+    },
+    {
+     "text": "sign",
+     "start": 43.744,
+     "end": 44
+    },
+    {
+     "text": "in",
+     "start": 44.053,
+     "end": 44.16
+    },
+    {
+     "text": "on",
+     "start": 44.213,
+     "end": 44.32
+    },
+    {
+     "text": "each",
+     "start": 44.368,
+     "end": 44.56
+    },
+    {
+     "text": "computer.",
+     "start": 44.622,
+     "end": 45.2
+    }
+   ]
+  },
+  {
+   "id": "depth",
+   "text": "Type a short word for your whole signature. Open a link, a folder or a program with one key. And nothing you delete is ever lost.",
+   "start": 45.52,
+   "end": 55.04,
+   "words": [
+    {
+     "text": "Type",
+     "start": 45.52,
+     "end": 46.48
+    },
+    {
+     "text": "a",
+     "start": 46.56,
+     "end": 46.64
+    },
+    {
+     "text": "short",
+     "start": 46.693,
+     "end": 46.96
+    },
+    {
+     "text": "word",
+     "start": 47.024,
+     "end": 47.28
+    },
+    {
+     "text": "for",
+     "start": 47.3,
+     "end": 47.36
+    },
+    {
+     "text": "your",
+     "start": 47.392,
+     "end": 47.52
+    },
+    {
+     "text": "whole",
+     "start": 47.573,
+     "end": 47.84
+    },
+    {
+     "text": "signature.",
+     "start": 47.896,
+     "end": 48.56
+    },
+    {
+     "text": "Open",
+     "start": 48.736,
+     "end": 49.44
+    },
+    {
+     "text": "a",
+     "start": 49.52,
+     "end": 49.6
+    },
+    {
+     "text": "link,",
+     "start": 49.664,
+     "end": 50.16
+    },
+    {
+     "text": "a",
+     "start": 50.2,
+     "end": 50.24
+    },
+    {
+     "text": "folder",
+     "start": 50.297,
+     "end": 50.64
+    },
+    {
+     "text": "or",
+     "start": 50.747,
+     "end": 50.96
+    },
+    {
+     "text": "a",
+     "start": 51,
+     "end": 51.04
+    },
+    {
+     "text": "program",
+     "start": 51.11,
+     "end": 51.6
+    },
+    {
+     "text": "with",
+     "start": 51.632,
+     "end": 51.76
+    },
+    {
+     "text": "one",
+     "start": 51.82,
+     "end": 52
+    },
+    {
+     "text": "key.",
+     "start": 52.1,
+     "end": 52.48
+    },
+    {
+     "text": "And",
+     "start": 52.66,
+     "end": 53.2
+    },
+    {
+     "text": "nothing",
+     "start": 53.26,
+     "end": 53.68
+    },
+    {
+     "text": "you",
+     "start": 53.72,
+     "end": 53.84
+    },
+    {
+     "text": "delete",
+     "start": 53.886,
+     "end": 54.16
+    },
+    {
+     "text": "is",
+     "start": 54.187,
+     "end": 54.24
+    },
+    {
+     "text": "ever",
+     "start": 54.304,
+     "end": 54.56
+    },
+    {
+     "text": "lost.",
+     "start": 54.656,
+     "end": 55.04
+    }
+   ]
+  },
+  {
+   "id": "privacy",
+   "text": "Your shortcuts are locked with a code only you have, before they leave your computer, so nobody else can read them. And KeyBridge never records what you type.",
+   "start": 55.248,
+   "end": 65.36,
+   "words": [
+    {
+     "text": "Your",
+     "start": 55.248,
+     "end": 56.08
+    },
+    {
+     "text": "shortcuts",
+     "start": 56.144,
+     "end": 56.72
+    },
+    {
+     "text": "are",
+     "start": 56.74,
+     "end": 56.8
+    },
+    {
+     "text": "locked",
+     "start": 56.857,
+     "end": 57.2
+    },
+    {
+     "text": "with",
+     "start": 57.216,
+     "end": 57.28
+    },
+    {
+     "text": "a",
+     "start": 57.36,
+     "end": 57.44
+    },
+    {
+     "text": "code",
+     "start": 57.52,
+     "end": 57.84
+    },
+    {
+     "text": "only",
+     "start": 57.888,
+     "end": 58.08
+    },
+    {
+     "text": "you",
+     "start": 58.14,
+     "end": 58.32
+    },
+    {
+     "text": "have,",
+     "start": 58.4,
+     "end": 59.04
+    },
+    {
+     "text": "before",
+     "start": 59.097,
+     "end": 59.44
+    },
+    {
+     "text": "they",
+     "start": 59.472,
+     "end": 59.6
+    },
+    {
+     "text": "leave",
+     "start": 59.627,
+     "end": 59.76
+    },
+    {
+     "text": "your",
+     "start": 59.792,
+     "end": 59.92
+    },
+    {
+     "text": "computer,",
+     "start": 59.982,
+     "end": 60.8
+    },
+    {
+     "text": "so",
+     "start": 60.853,
+     "end": 60.96
+    },
+    {
+     "text": "nobody",
+     "start": 61.017,
+     "end": 61.36
+    },
+    {
+     "text": "else",
+     "start": 61.392,
+     "end": 61.52
+    },
+    {
+     "text": "can",
+     "start": 61.58,
+     "end": 61.76
+    },
+    {
+     "text": "read",
+     "start": 61.808,
+     "end": 62
+    },
+    {
+     "text": "them.",
+     "start": 62.048,
+     "end": 62.32
+    },
+    {
+     "text": "And",
+     "start": 62.54,
+     "end": 63.2
+    },
+    {
+     "text": "KeyBridge",
+     "start": 63.28,
+     "end": 63.76
+    },
+    {
+     "text": "never",
+     "start": 63.813,
+     "end": 64.08
+    },
+    {
+     "text": "records",
+     "start": 64.14,
+     "end": 64.56
+    },
+    {
+     "text": "what",
+     "start": 64.592,
+     "end": 64.72
+    },
+    {
+     "text": "you",
+     "start": 64.76,
+     "end": 64.88
+    },
+    {
+     "text": "type.",
+     "start": 64.96,
+     "end": 65.36
+    }
+   ]
+  },
+  {
+   "id": "languages",
+   "text": "In English, Hebrew, Spanish, French, Russian, or Arabic.",
+   "start": 65.893,
+   "end": 70.36,
+   "words": [
+    {
+     "text": "In",
+     "start": 65.893,
+     "end": 66.16
+    },
+    {
+     "text": "English,",
+     "start": 66.22,
+     "end": 66.72
+    },
+    {
+     "text": "Hebrew,",
+     "start": 66.811,
+     "end": 67.72
+    },
+    {
+     "text": "Spanish,",
+     "start": 67.765,
+     "end": 68.16
+    },
+    {
+     "text": "French,",
+     "start": 68.24,
+     "end": 69.08
+    },
+    {
+     "text": "Russian,",
+     "start": 69.125,
+     "end": 69.6
+    },
+    {
+     "text": "or",
+     "start": 69.653,
+     "end": 69.76
+    },
+    {
+     "text": "Arabic.",
+     "start": 69.84,
+     "end": 70.36
+    }
+   ]
+  },
+  {
+   "id": "payoff",
+   "text": "So stop typing the same things over and over. Just press it... once.",
+   "start": 70.64,
+   "end": 75.76,
+   "words": [
+    {
+     "text": "So",
+     "start": 70.64,
+     "end": 71.12
+    },
+    {
+     "text": "stop",
+     "start": 71.184,
+     "end": 71.44
+    },
+    {
+     "text": "typing",
+     "start": 71.497,
+     "end": 71.84
+    },
+    {
+     "text": "the",
+     "start": 71.86,
+     "end": 71.92
+    },
+    {
+     "text": "same",
+     "start": 71.984,
+     "end": 72.24
+    },
+    {
+     "text": "things",
+     "start": 72.297,
+     "end": 72.64
+    },
+    {
+     "text": "over",
+     "start": 72.704,
+     "end": 72.96
+    },
+    {
+     "text": "and",
+     "start": 73,
+     "end": 73.12
+    },
+    {
+     "text": "over.",
+     "start": 73.184,
+     "end": 73.52
+    },
+    {
+     "text": "Just",
+     "start": 73.664,
+     "end": 74.24
+    },
+    {
+     "text": "press",
+     "start": 74.293,
+     "end": 74.56
+    },
+    {
+     "text": "it...",
+     "start": 74.613,
+     "end": 75.2
+    },
+    {
+     "text": "once.",
+     "start": 75.296,
+     "end": 75.76
+    }
+   ]
+  },
+  {
+   "id": "end",
+   "text": "KeyBridge. Free and open source, for Mac and Windows.",
+   "start": 76.51,
+   "end": 80.48,
+   "words": [
+    {
+     "text": "KeyBridge.",
+     "start": 76.51,
+     "end": 77.36
+    },
+    {
+     "text": "Free",
+     "start": 77.472,
+     "end": 77.92
+    },
+    {
+     "text": "and",
+     "start": 77.96,
+     "end": 78.08
+    },
+    {
+     "text": "open",
+     "start": 78.144,
+     "end": 78.4
+    },
+    {
+     "text": "source,",
+     "start": 78.48,
+     "end": 79.12
+    },
+    {
+     "text": "for",
+     "start": 79.16,
+     "end": 79.28
+    },
+    {
+     "text": "Mac",
+     "start": 79.36,
+     "end": 79.6
+    },
+    {
+     "text": "and",
+     "start": 79.62,
+     "end": 79.68
+    },
+    {
+     "text": "Windows.",
+     "start": 79.76,
+     "end": 80.48
+    }
+   ]
+  }
+ ]
+}

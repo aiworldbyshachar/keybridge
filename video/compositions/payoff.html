@@ -1,0 +1,91 @@
+<template>
+  <link rel="stylesheet" href="assets/ui.css">
+  <style>
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI"); font-weight: 400; }
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI Semibold"); font-weight: 600; }
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI Bold"); font-weight: 700; }
+    @font-face { font-family: "CB Mono"; src: local("Consolas"); font-weight: 400; }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #f1ece4; }
+    #y-world { position: absolute; inset: 0; }
+    #y-world .mac-wall { position: absolute; inset: 0; }
+    #y-menubar { position: absolute; left: 0; top: 0; width: 960px; transform: scale(2); transform-origin: 0 0; }
+    #y-menubar .tray { width: 15px; height: 15px; border-radius: 3px; }
+    #y-mail { left: 260px; top: 110px; width: 1400px; height: 720px; border-radius: 16px; }
+    #y-mail .win-bar { height: 52px; font-size: 22px; padding: 0 20px; }
+    #y-mail .dots i { width: 16px; height: 16px; }
+    #y-mail .field-line { font-size: 30px; padding: 14px 30px; }
+    #y-mail .field-line b { width: 130px; color: #66666e; }
+    #y-body { padding: 30px; font: 400 34px/1.6 "CB Sans"; color: #1d1d1f; white-space: pre-line; }
+    #y-body .caret { height: 40px; width: 3px; }
+    #y-send { position: absolute; right: 30px; bottom: 26px; padding: 12px 32px; border-radius: 10px; background: #2f6fd6; color: #fff; font: 600 26px "CB Sans"; }
+    .y-keys { position: absolute; left: 0; right: 0; top: 866px; display: flex; justify-content: center; align-items: center; gap: 24px; }
+    .y-keys .fkey { height: 120px; min-width: 120px; font-size: 56px; border-radius: 22px; }
+    .y-keys .fkey.mod { min-width: 190px; }
+    .y-keys .fkey.mod .side { font-size: 24px; }
+  </style>
+
+  <div id="root" data-composition-id="payoff" data-width="1920" data-height="1080">
+    <div id="y-world">
+      <div class="mac-wall"></div>
+      <div id="y-menubar" class="mac-menubar"><span style="font-weight: 400">File</span><span style="font-weight: 400">Edit</span><span style="font-weight: 400">View</span>
+        <span class="right"><img class="tray" src="assets/img/icon-128.png" alt=""><span>Thu 9:42</span></span></div>
+      <div id="y-mail" class="win">
+        <div class="win-bar"><span class="dots"><i></i><i></i><i></i></span><span>Re: Thursday</span></div>
+        <div class="field-line"><b>To</b>noa@example.com</div>
+        <div class="field-line"><b>Subject</b>Re: Thursday</div>
+        <div id="y-body"><span id="y-text" data-text=""></span><span id="y-addr" data-text=""></span><span id="y-end" data-text=""></span><span id="y-sig" data-text=""></span><i class="caret"></i></div>
+        <span id="y-send">Send</span>
+      </div>
+      <div id="y-keys-e" class="y-keys"><div id="y-rshift" class="fkey mod"><span class="side">Right</span><span>Shift</span></div><span class="fplus">+</span><div id="y-e" class="fkey">E</div></div>
+      <div id="y-keys-s" class="y-keys"><div id="y-space" class="fkey" style="min-width: 380px">Space</div></div>
+    </div>
+    <svg id="y-cursor" class="cursor" viewBox="0 0 22 32"><path d="M2 2 L2 26 L8 20 L12 30 L16 28 L12 18.5 L20 18.5 Z" fill="#111" stroke="#fff" stroke-width="2" stroke-linejoin="round" /></svg>
+  </div>
+
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // Text, classes and values change through tweens that state both sides, so any seek (back or forth,
+    // or a scene shown again) lands on the right state. "Empty" is a zero-width space, never "".
+    const ZW = "\u200b";
+    const swap = (sel, attr, from, to, t) =>
+      tl.fromTo(sel, { attr: { [attr]: from || ZW } }, { attr: { [attr]: to || ZW }, duration: 0.001, ease: "none", immediateRender: false }, t);
+    const SIG = "Best regards,\nDana Levi\nExample Ltd.";
+    // Scene time = film time - 71.0. Normal speed: a person types, the shortcuts land.
+    const down = (sel, t) => tl.to(sel, { y: 6, borderBottomWidth: 1, duration: 0.067, ease: "power2.out" }, t);
+    const up = (sel, t) => tl.to(sel, { y: 0, borderBottomWidth: 5, duration: 0.1, ease: "power2.out" }, t);
+    const type = (sel, text, t0, per) => {
+      for (let i = 1; i <= text.length; i++) swap(sel, "data-text", text.slice(0, i - 1), text.slice(0, i), t0 + i * per);
+    };
+    gsap.set(["#y-keys-e", "#y-keys-s"], { opacity: 0 });
+    gsap.set(["#y-text", "#y-addr", "#y-end", "#y-sig"], { attr: { "data-text": ZW } });
+    gsap.set("#y-cursor", { x: 1500, y: 1120 });
+
+    tl.fromTo("#y-mail", { scale: 1.03, filter: "blur(6px)" }, { scale: 1, filter: "blur(0px)", duration: 0.4, ease: "expo.out" }, 0);
+    // "So stop typing the same things": a person types the sentence...
+    type("#y-text", "Hi Noa,\nSure! Reach me at ", 0.25, 0.04);
+    // ...and the address is one shortcut
+    tl.fromTo("#y-keys-e", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.3, ease: "expo.out" }, 1.0);
+    down("#y-rshift", 1.25);
+    down("#y-e", 1.38);
+    swap("#y-addr", "data-text", "", "dana.levi@example.com", 1.45);
+    up("#y-e", 1.55);
+    up("#y-rshift", 1.65);
+    tl.to("#y-keys-e", { opacity: 0, y: 20, duration: 0.18, ease: "power3.in" }, 1.85);
+    // "over and over": the signature is another
+    type("#y-end", "\n\n;sig", 1.95, 0.07);
+    tl.fromTo("#y-keys-s", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.3, ease: "expo.out" }, 2.2);
+    down("#y-space", 2.62);
+    swap("#y-end", "data-text", "\n\n;sig", "\n\n", 2.69);
+    swap("#y-sig", "data-text", "", SIG, 2.69);
+    up("#y-space", 2.85);
+    tl.to("#y-keys-s", { opacity: 0, y: 20, duration: 0.18, ease: "power3.in" }, 3.2);
+
+    // "Just press it... once": Send
+    tl.to("#y-cursor", { x: 1560, y: 770, duration: 0.6, ease: "expo.out" }, 3.7);
+    tl.to("#y-send", { scale: 0.95, duration: 0.067, yoyo: true, repeat: 1, ease: "power2.out" }, 4.8);
+    tl.to("#y-cursor", { opacity: 0, duration: 0.15 }, 4.95);
+    tl.to("#y-mail", { y: -60, scale: 0.9, opacity: 0, duration: 0.28, ease: "power3.in" }, 4.88);
+
+    window.__timelines["payoff"] = tl;
+  </script>
+</template>

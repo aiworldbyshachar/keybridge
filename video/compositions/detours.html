@@ -1,0 +1,136 @@
+<template>
+  <link rel="stylesheet" href="assets/ui.css" />
+  <style>
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI"); font-weight: 400; }
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI Semibold"); font-weight: 600; }
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI Bold"); font-weight: 700; }
+    @font-face { font-family: "CB Mono"; src: local("Consolas"); font-weight: 400; }
+    #root { position: absolute; inset: 0; overflow: hidden; font-family: "CB Sans"; color: #2b2b30; }
+    #dt-wrap { position: absolute; inset: 0; background: #e7e5e1; }
+    .t-grain { position: absolute; inset: 0; opacity: 0.06;
+      background-image: repeating-radial-gradient(circle at 31% 27%, #000 0 1px, transparent 1px 3px), repeating-radial-gradient(circle at 63% 71%, #000 0 1px, transparent 1px 4px); }
+    .gwin { position: absolute; background: #fbfbfb; border-radius: 16px; box-shadow: 0 30px 70px rgba(30, 30, 40, 0.18); overflow: hidden; }
+    .gbar { height: 54px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; background: #f0f0f0; border-bottom: 1px solid #e2e2e2; font-size: 22px; font-weight: 600; color: #5d5d63; }
+    .gkeys { position: absolute; display: flex; gap: 14px; align-items: center; }
+    .gkeys .fkey { min-width: 110px; height: 96px; font-size: 40px; }
+    .gkeys .fplus { font-size: 44px; }
+
+    /* 1. the note of things you paste */
+    #v1 { left: 360px; top: 190px; width: 1200px; height: 620px; }
+    #v1 .lines { padding: 30px 40px; font: 400 40px/1.9 "CB Mono", monospace; color: #45454b; }
+    #v1 .line { position: relative; display: inline-block; }
+    #v1 .line b { position: relative; font-weight: 400; }
+    #v1-sel { position: absolute; left: -6px; right: -6px; top: 8px; bottom: 8px; border-radius: 4px; background: #c9cfe0; transform-origin: 0 50%; }
+    #v1-keys { right: 60px; bottom: 54px; }
+
+    /* 2. typed again, one letter wrong */
+    #v2 { left: 310px; top: 300px; width: 1300px; height: 420px; }
+    #v2 .lbl { padding: 46px 60px 14px; font: 600 30px "CB Sans"; color: #7a7a80; }
+    #v2 .field { margin: 0 60px; height: 110px; display: flex; align-items: center; padding: 0 30px; border: 2px solid #b9bcc6; border-radius: 16px; background: #fff; font: 400 58px "CB Sans"; color: #2b2b30; white-space: nowrap; }
+    #v2-text.wrong { text-decoration: underline wavy #c64a4a; text-decoration-thickness: 3px; text-underline-offset: 10px; }
+    #v2 .caret { width: 3px; height: 60px; background: #2b2b30; margin-left: 2px; }
+
+    /* 3. a new laptop, nothing set up */
+    #v3 { position: absolute; left: 460px; top: 150px; width: 1000px; height: 760px; }
+    #v3-lid { position: absolute; left: 50px; top: 0; width: 900px; height: 580px; border-radius: 26px 26px 10px 10px; background: #b9bbc0; padding: 16px; }
+    #v3-screen { position: relative; width: 100%; height: 100%; border-radius: 10px; overflow: hidden; background: radial-gradient(900px 600px at 70% 90%, #d9d4dd 0%, #cfd3db 55%, #c3c9d3 100%); }
+    #v3-base { position: absolute; left: 0; top: 580px; width: 1000px; height: 30px; border-radius: 4px 4px 22px 22px; background: linear-gradient(#c9cbd0, #a9abb0); }
+    #v3-card { position: absolute; left: 180px; top: 140px; width: 508px; padding: 34px 36px; border-radius: 16px; background: #fbfbfb; box-shadow: 0 20px 40px rgba(30, 30, 40, 0.16); }
+    #v3-card h3 { margin: 0 0 22px; font: 700 36px "CB Sans"; color: #45454b; }
+    #v3-card .lbl { font: 600 28px "CB Sans"; color: #66666e; margin-bottom: 8px; }
+    #v3-card .field { height: 62px; display: flex; align-items: center; padding: 0 18px; border: 2px solid #b9bcc6; border-radius: 12px; background: #fff; }
+    #v3-card .caret { width: 3px; height: 34px; background: #2b2b30; }
+    #v3-dim { position: absolute; inset: 0; background: #111; }
+  </style>
+
+  <div id="root" data-composition-id="detours" data-width="1920" data-height="1080">
+   <div id="dt-wrap">
+    <div class="t-grain"></div>
+
+    <!-- 1. keep it in a note, copy it from there -->
+    <div id="v1" class="gwin">
+      <div class="gbar"><span>things I paste.txt</span><span style="letter-spacing: 18px">-☐✕</span></div>
+      <div class="lines">
+        <span class="line"><i id="v1-sel"></i><b>dana.levi@example.com</b></span><br>
+        12 Herzl Street, Tel Aviv<br>
+        +972 50 000 0000<br>
+        calendar.example.com/team
+      </div>
+      <div id="v1-keys" class="gkeys"><div id="v1-ctrl" class="fkey">Ctrl</div><span class="fplus">+</span><div id="v1-c" class="fkey">C</div></div>
+    </div>
+
+    <!-- 2. type it again... one letter wrong -->
+    <div id="v2" class="gwin">
+      <div class="gbar"><span>New message</span><span style="letter-spacing: 18px">-☐✕</span></div>
+      <div class="lbl">To</div>
+      <div class="field"><span id="v2-text" data-text=""></span><i class="caret"></i></div>
+    </div>
+
+    <!-- 3. a new computer: start all over -->
+    <div id="v3">
+      <div id="v3-lid"><div id="v3-screen">
+        <div id="v3-card">
+          <h3>Create your account</h3>
+          <div class="lbl">Email</div>
+          <div class="field"><i id="v3-caret" class="caret"></i></div>
+        </div>
+        <div id="v3-dim"></div>
+      </div></div>
+      <div id="v3-base"></div>
+    </div>
+
+    <svg id="dt-cursor" class="cursor" viewBox="0 0 22 32" style="width: 44px; height: 64px"><path d="M2 2 L2 26 L8 20 L12 30 L16 28 L12 18.5 L20 18.5 Z" fill="#111" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg>
+   </div>
+  </div>
+
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // Text, classes and values change through tweens that state both sides, so any seek (back or forth,
+    // or a scene shown again) lands on the right state. "Empty" is a zero-width space, never "".
+    const ZW = "\u200b";
+    const swap = (sel, attr, from, to, t) =>
+      tl.fromTo(sel, { attr: { [attr]: from || ZW } }, { attr: { [attr]: to || ZW }, duration: 0.001, ease: "none", immediateRender: false }, t);
+    const SIG = "Best regards,\nDana Levi\nExample Ltd.";
+    // Scene time = film time - 11.3
+    const type = (sel, text, t0, per) => {
+      for (let i = 1; i <= text.length; i++) swap(sel, "data-text", text.slice(0, i - 1), text.slice(0, i), t0 + i * per);
+    };
+    const press = (sel, t) => tl.to(sel, { y: "+=6", borderBottomWidth: 1, duration: 0.067, yoyo: true, repeat: 1, ease: "power2.out" }, t);
+    gsap.set(["#v2", "#v3"], { opacity: 0 });
+    gsap.set("#v2-text", { attr: { "data-text": ZW, class: ZW } });
+    gsap.set("#v1-sel", { scaleX: 0 });
+    gsap.set("#v1-keys", { opacity: 0 });
+    gsap.set("#dt-cursor", { x: 1500, y: 1000, opacity: 0 });
+
+    // the overlay arrives over the desk (with the sigh)
+    tl.fromTo("#dt-wrap", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power2.out" }, 0);
+
+    // 1. "So you keep it in a note, and copy it from there"
+    tl.fromTo("#v1", { y: 220, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "expo.out" }, 0.05);
+    tl.to("#dt-cursor", { opacity: 1, duration: 0.12 }, 0.85);
+    tl.to("#dt-cursor", { x: 392, y: 296, duration: 0.45, ease: "expo.out" }, 0.85);
+    tl.to("#v1-sel", { scaleX: 1, duration: 0.45, ease: "power1.inOut" }, 1.25);
+    tl.to("#dt-cursor", { x: 896, duration: 0.45, ease: "power1.inOut" }, 1.3);
+    tl.to("#dt-cursor", { opacity: 0, duration: 0.15 }, 1.8);
+    tl.fromTo("#v1-keys", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3, ease: "expo.out" }, 1.75);
+    press("#v1-ctrl", 2.0);
+    press("#v1-c", 2.0);
+    tl.to("#v1", { x: -200, opacity: 0, filter: "blur(8px)", duration: 0.3, ease: "power3.in" }, 3.2);
+
+    // 2. "Type it again... one letter wrong"
+    tl.fromTo("#v2", { opacity: 0, x: 140, filter: "blur(8px)" }, { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.4, ease: "expo.out" }, 3.35);
+    type("#v2-text", "dana.levi@exmaple.com", 3.75, 0.06);
+    swap("#v2-text", "class", "", "wrong", 5.51);
+    tl.fromTo("#v2", { rotation: 0 }, { rotation: 0.6, duration: 0.05, yoyo: true, repeat: 3, ease: "sine.inOut" }, 5.55);
+    tl.to("#v2", { x: -160, opacity: 0, filter: "blur(8px)", duration: 0.3, ease: "power3.in" }, 6.55);
+
+    // 3. "And on a new computer? You start all over."
+    tl.fromTo("#v3", { opacity: 0, y: 160 }, { opacity: 1, y: 0, duration: 0.55, ease: "expo.out" }, 6.8);
+    tl.fromTo("#v3-dim", { opacity: 0.85 }, { opacity: 0, duration: 0.4, ease: "power2.out" }, 7.35);
+    tl.fromTo("#v3-caret", { opacity: 1 }, { opacity: 0, duration: 0.01, yoyo: true, repeat: 5, repeatDelay: 0.42 }, 8.44);
+
+    // the overlay hands back to the desk
+    tl.to("#dt-wrap", { opacity: 0, duration: 0.3, ease: "power2.in" }, 9.75);
+    window.__timelines["detours"] = tl;
+  </script>
+</template>

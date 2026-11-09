@@ -1,0 +1,12 @@
+{
+  "name": "keybridge-film",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes hyperframes@0.9.26 preview",
+    "check": "npx --yes hyperframes@0.9.26 check",
+    "render": "npx --yes hyperframes@0.9.26 render",
+    "snapshot": "npx --yes hyperframes@0.9.26 snapshot",
+    "ui": "node tools/grab-ui.cjs && node tools/scope-ui.mjs && node tools/inject-ui.mjs"
+  }
+}

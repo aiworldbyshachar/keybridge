@@ -1,0 +1,138 @@
+<template>
+  <link rel="stylesheet" href="assets/ui.css" />
+  <style>
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI"); font-weight: 400; }
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI Semibold"); font-weight: 600; }
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI Bold"); font-weight: 700; }
+    @font-face { font-family: "CB Mono"; src: local("Consolas"); font-weight: 400; }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #f1ece4; }
+
+    /* 1. locked on this computer, sealed in the cloud */
+    #v-one { position: absolute; inset: 0; }
+    #v-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+    .v-card { position: absolute; display: flex; align-items: center; gap: 22px; padding: 18px 26px; border-radius: 16px; background: #fff; border: 1px solid #e3e3eb; box-shadow: 0 10px 26px rgba(22, 22, 44, 0.12); font-family: "CB Sans"; white-space: nowrap; }
+    #v-card { left: 240px; top: 410px; width: 560px; }
+    .v-combo { display: flex; align-items: center; gap: 6px; }
+    .v-cap { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; min-width: 54px; height: 54px; padding: 0 10px; border-radius: 10px; border: 1px solid #d2d2de; border-bottom-width: 3px; background: #fff; font: 600 20px/1 "CB Sans"; color: #191923; }
+    .v-cap small { font-size: 12px; color: #5550d8; font-weight: 600; margin-bottom: 2px; }
+    .v-combo i { font-style: normal; color: #9898a7; font: 600 20px "CB Sans"; }
+    .v-text b { display: block; font: 700 24px "CB Sans"; color: #191923; }
+    .v-text span { font: 400 20px "CB Sans"; color: #676778; }
+    #v-lock { position: absolute; left: 768px; top: 392px; width: 64px; height: 64px; border-radius: 50%; background: #fff; border: 4px solid #5550d8; display: grid; place-items: center; box-shadow: 0 10px 22px rgba(25, 25, 35, 0.18); }
+    #v-lock svg { width: 30px; height: 30px; fill: none; stroke: #5550d8; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+    #v-code { position: absolute; left: 330px; top: 560px; display: flex; align-items: center; gap: 14px; padding: 10px 20px; border-radius: 12px; background: #ebebfd; font-family: "CB Sans"; }
+    #v-code b { font: 600 20px "CB Sans"; color: #5550d8; }
+    #v-code span { font: 400 22px "CB Mono", monospace; color: #191923; letter-spacing: 0.08em; }
+    #v-path { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+    #v-cloud { position: absolute; left: 1360px; top: 170px; width: 360px; height: 225px; }
+    #v-sealed { left: 0; top: 0; padding: 14px 22px; border-radius: 12px; background: #191923; color: #fff; font: 400 24px "CB Mono", monospace; white-space: nowrap; letter-spacing: 0.04em; box-shadow: 0 12px 28px rgba(25, 25, 35, 0.25); }
+    #v-sealed .lk { display: inline-block; width: 22px; height: 22px; margin-right: 12px; vertical-align: -3px; }
+    #v-sealed .lk svg { width: 22px; height: 22px; fill: none; stroke: #a6a3ff; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* 2. typing: KeyBridge hears only "a shortcut was pressed" */
+    #v-two { position: absolute; inset: 0; background: #f5f5f8; }
+    #v-field { position: absolute; left: 260px; top: 150px; width: 1400px; height: 120px; display: flex; align-items: center; padding: 0 40px; border: 2px solid #d7d7de; border-radius: 18px; background: #fff; font: 400 54px "CB Sans"; color: #1d1d1f; white-space: nowrap; }
+    #v-field .caret { width: 3px; height: 60px; }
+    #v-heard { position: absolute; left: 560px; top: 330px; width: 800px; height: 150px; display: flex; align-items: center; gap: 26px; padding: 0 34px; border-radius: 18px; background: #fff; border: 1px solid #e3e3eb; box-shadow: 0 10px 26px rgba(22, 22, 44, 0.1); font-family: "CB Sans"; }
+    #v-heard img { width: 72px; height: 72px; }
+    #v-heard small { display: block; font: 600 24px "CB Sans"; color: #676778; }
+    #v-heard b { display: block; height: 44px; font: 600 36px "CB Sans"; color: #191923; }
+    #v-kb { position: absolute; left: 0; right: 0; top: 560px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    #v-kb .r { display: flex; gap: 14px; }
+    #v-kb .fkey { min-width: 104px; height: 104px; font-size: 40px; padding: 0 16px; }
+    #v-kb .fkey.mod { min-width: 190px; }
+    #v-kb .fkey.mod .side { font-size: 20px; }
+  </style>
+
+  <div id="root" data-composition-id="privacy" data-width="1920" data-height="1080">
+    <div id="v-one" class="world-desk" data-layout-allow-overflow>
+      <div id="v-stage" data-layout-allow-overflow>
+        <div class="wall"></div>
+        <div class="desk-top"></div>
+        <div class="mac-lid">
+          <div class="mac-screen">
+            <div class="mac-wall"></div>
+            <div class="mac-menubar"><span style="font-weight: 400">File</span><span style="font-weight: 400">Edit</span><span style="font-weight: 400">View</span>
+              <span class="right"><img class="tray" src="assets/img/icon-128.png" alt=""><span>Thu 9:41</span></span></div>
+          </div>
+          <div class="mac-notch"></div>
+        </div>
+        <div class="mac-base"><div class="mac-scoop"></div></div>
+
+        <div id="v-card" class="v-card">
+          <span class="v-combo"><span class="v-cap"><small>Right</small>Shift</span><i>+</i><span class="v-cap">E</span></span>
+          <span class="v-text"><b>Email</b><span>dana.levi@example.com</span></span>
+        </div>
+        <div id="v-lock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
+        <div id="v-code"><b>Your code</b><span>●●●●-●●●●-●●●●</span></div>
+
+        <svg id="v-path" viewBox="0 0 1920 1080"><path d="M 830 380 C 1000 160, 1180 250, 1390 300" fill="none" stroke="#b9b9c4" stroke-width="5" stroke-dasharray="14 12" stroke-linecap="round"/></svg>
+        <svg id="v-cloud" viewBox="0 0 160 100"><path d="M40 88 h86 a28 28 0 0 0 4-55.7 A40 40 0 0 0 54 26 A30 30 0 0 0 40 88 z" fill="#fff" stroke="#9a9aa8" stroke-width="4" stroke-linejoin="round"/></svg>
+        <div id="v-sealed" class="abs"><span class="lk"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><span id="v-sealed-text" data-text="Email · dana.levi@example.com"></span></div>
+      </div>
+      <div class="grain"></div>
+    </div>
+
+    <div id="v-two">
+      <div id="v-field"><span id="v-typed" data-text=""></span><i class="caret"></i></div>
+      <div id="v-heard"><img src="assets/img/icon-128.png" alt=""><span><small>What KeyBridge hears</small><b id="v-heard-line" data-text=""></b></span></div>
+      <div id="v-kb">
+        <div class="r"><div id="k-q" class="fkey">Q</div><div id="k-w" class="fkey">W</div><div id="k-e" class="fkey">E</div><div id="k-r" class="fkey">R</div><div id="k-t" class="fkey">T</div><div id="k-y" class="fkey">Y</div><div id="k-u" class="fkey">U</div><div id="k-i" class="fkey">I</div><div id="k-o" class="fkey">O</div><div id="k-p" class="fkey">P</div></div>
+        <div class="r"><div id="k-a" class="fkey">A</div><div id="k-s" class="fkey">S</div><div id="k-d" class="fkey">D</div><div id="k-f" class="fkey">F</div><div id="k-g" class="fkey">G</div><div id="k-h" class="fkey">H</div><div id="k-j" class="fkey">J</div><div id="k-k" class="fkey">K</div><div id="k-l" class="fkey">L</div></div>
+        <div class="r"><div id="k-ls" class="fkey mod"><span class="side left">Left</span><span>Shift</span></div><div id="k-z" class="fkey">Z</div><div id="k-x" class="fkey">X</div><div id="k-c" class="fkey">C</div><div id="k-v" class="fkey">V</div><div id="k-b" class="fkey">B</div><div id="k-n" class="fkey">N</div><div id="k-m" class="fkey">M</div><div id="k-rs" class="fkey mod"><span class="side">Right</span><span>Shift</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // Text, classes and values change through tweens that state both sides, so any seek (back or forth,
+    // or a scene shown again) lands on the right state. "Empty" is a zero-width space, never "".
+    const ZW = "\u200b";
+    const swap = (sel, attr, from, to, t) =>
+      tl.fromTo(sel, { attr: { [attr]: from || ZW } }, { attr: { [attr]: to || ZW }, duration: 0.001, ease: "none", immediateRender: false }, t);
+    const SIG = "Best regards,\nDana Levi\nExample Ltd.";
+    // Scene time = film time - 56.2
+    const tap = (sel, t) => tl.to(sel, { y: 6, borderBottomWidth: 1, duration: 0.05, yoyo: true, repeat: 1, ease: "power2.out" }, t);
+    const SEALED = ["v1.k9Qx2fLp7wZt4mB0q8Rv", "v1.Zt4mB0q8Rv1k9Qx2fLp7", "v1.q8Rv1Zt4k9Qx2mB0fLp7", "v1.7wZt4k9Qx2fLp0q8RvmB"];
+
+    gsap.set("#v-stage", { x: 60, y: 40 });
+    const PLAIN = "Email · dana.levi@example.com";
+    gsap.set("#v-sealed-text", { attr: { "data-text": PLAIN } });
+    gsap.set(["#v-typed", "#v-heard-line"], { attr: { "data-text": ZW } });
+    gsap.set(["#v-lock", "#v-code", "#v-sealed", "#v-two"], { opacity: 0 });
+    gsap.set("#v-sealed", { x: 300, y: 420 });
+
+    // 1. "Your shortcuts are locked with a code only you have"
+    tl.fromTo("#v-card", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.45, ease: "expo.out" }, 0.3);
+    tl.fromTo("#v-lock", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.4)" }, 1.16);
+    tl.fromTo("#v-code", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.4, ease: "expo.out" }, 1.82);
+    // "before they leave your computer": what leaves is sealed
+    tl.fromTo("#v-sealed", { opacity: 0, x: 300, y: 420 }, { opacity: 1, y: 340, duration: 0.4, ease: "expo.out" }, 3.5);
+    SEALED.forEach((s, i) => swap("#v-sealed-text", "data-text", i ? SEALED[i - 1] : PLAIN, s, 3.75 + i * 0.12));
+    tl.to("#v-sealed", { x: 1390, duration: 1.0, ease: "power1.inOut" }, 3.93);
+    tl.to("#v-sealed", { y: 250, duration: 1.0, ease: "power2.out" }, 3.93);
+    // "so nobody else can read them": the cloud holds only the sealed copy
+    tl.to("#v-sealed", { x: 1345, y: 300, duration: 0.5, ease: "power2.inOut" }, 5.2);
+
+    // 2. "And KeyBridge never records what you type"
+    tl.fromTo("#v-two", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power2.out" }, 7.35);
+    tl.set("#v-one", { opacity: 0 }, 7.62);
+    const words = "Reach me at ";
+    [...words].forEach((c, i) => {
+      const t = 7.7 + i * 0.075;
+      swap("#v-typed", "data-text", words.slice(0, i), words.slice(0, i + 1), t);
+      if (c !== " ") tap(`#k-${c.toLowerCase()}`, t - 0.02);
+      if (c === "R") tap("#k-ls", t - 0.04);
+    });
+    // Right Shift + E: the address lands, and that's the one thing KeyBridge hears
+    tl.to("#k-rs", { y: 6, borderBottomWidth: 1, duration: 0.05, ease: "power2.out" }, 9.15);
+    tap("#k-e", 9.25);
+    tl.to("#k-rs", { y: 0, borderBottomWidth: 5, duration: 0.08, ease: "power2.out" }, 9.45);
+    swap("#v-typed", "data-text", words, words + "dana.levi@example.com", 9.3);
+    swap("#v-heard-line", "data-text", "", "Email - pressed", 9.32);
+    tl.fromTo("#v-heard-line", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, 9.32);
+
+    window.__timelines["privacy"] = tl;
+  </script>
+</template>

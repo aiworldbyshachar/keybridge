@@ -1,0 +1,149 @@
+<template>
+  <link rel="stylesheet" href="assets/ui.css">
+  <link rel="stylesheet" href="assets/kb.css">
+  <style>
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI"); font-weight: 400; }
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI Semibold"); font-weight: 600; }
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI Bold"); font-weight: 700; }
+    @font-face { font-family: "CB Mono"; src: local("Consolas"); font-weight: 400; }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #f5f5f8; }
+    #c-world { position: absolute; inset: 0; background: radial-gradient(1400px 900px at 30% 20%, #f4f8fd 0%, #dbe7f5 55%, #c7d8ee 100%); }
+
+    /* the PC's sign-up page, close up */
+    #c-browser { left: 210px; top: 300px; width: 1500px; height: 700px; border-radius: 16px; }
+    #c-browser .win-bar { height: 56px; font-size: 22px; padding: 0 22px; }
+    #c-form { padding: 50px 120px 0; font-family: "CB Sans"; }
+    #c-form h3 { margin: 0 0 30px; font: 700 44px "CB Sans"; color: #1d1d1f; }
+    #c-form label { display: block; margin: 0 0 8px; font: 600 28px "CB Sans"; color: #66666e; }
+    #c-form .in { position: relative; display: flex; align-items: center; height: 80px; padding: 0 28px; border: 2px solid #d7d7de; border-radius: 14px; background: #fff; font: 400 40px "CB Sans"; color: #1d1d1f; white-space: nowrap; }
+    #c-form .in.focus { border-color: #2f6fd6; box-shadow: 0 0 0 5px #dbe7fb; }
+    #c-form .in.tall { height: 160px; align-items: flex-start; padding-top: 18px; margin-top: 0; }
+    #c-form .gap { height: 34px; }
+    #c-form .caret { width: 3px; height: 46px; background: #1d1d1f; }
+    #c-e { position: relative; display: inline-block; }
+    #c-ring { position: absolute; left: 50%; top: 50%; width: 96px; height: 96px; margin: -48px 0 0 -48px; overflow: visible; }
+
+    /* the keys, above the page */
+    .c-keys { position: absolute; left: 0; right: 0; top: 96px; display: flex; justify-content: center; align-items: center; gap: 28px; }
+
+    /* the real KeyBridge window at 1.6x */
+    #c-win { left: 208px; top: 28px; }
+  </style>
+
+  <div id="root" data-composition-id="core" data-width="1920" data-height="1080">
+    <div id="c-world">
+      <div id="c-browser" class="win">
+        <div class="win-bar pcbar"><span>Create your account</span><span style="letter-spacing: 18px; color: #666">-☐✕</span></div>
+        <div id="c-form">
+          <h3>Create your account</h3>
+          <label>Email</label>
+          <div id="c-email-box" class="in focus"><span id="c-email" data-text=""></span><i id="c-email-caret" class="caret"></i></div>
+          <div class="gap"></div>
+          <label>About you</label>
+          <div id="c-about-box" class="in tall"><span id="c-e">E<svg id="c-ring" viewBox="0 0 96 96"><circle id="c-ring-path" cx="48" cy="48" r="42" pathLength="1" fill="none" stroke="#5550d8" stroke-width="5" stroke-dasharray="1 1" stroke-linecap="round" /></svg></span><i id="c-about-caret" class="caret"></i></div>
+        </div>
+      </div>
+
+      <div id="c-keys-r" class="c-keys">
+        <div id="c-rshift" class="fkey big mod"><span class="side">Right</span><span>Shift</span></div><span class="fplus">+</span><div id="c-re" class="fkey big">E</div>
+      </div>
+      <div id="c-keys-l" class="c-keys">
+        <div id="c-lshift" class="fkey big mod"><span class="side left">Left</span><span>Shift</span></div><span class="fplus">+</span><div id="c-le" class="fkey big">E</div>
+      </div>
+    </div>
+
+    <div id="c-win" class="kbw"><!-- ui:win-list --><div class="kb" dir="ltr" lang="en"><div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <img src="assets/img/icon-128.png" alt="" width="26" height="26">
+        <span>KeyBridge</span>
+      </div>
+      <button class="status online" type="button" data-i18n-title="accountTitle" title="Synced 2 minutes ago" aria-label="Your account" data-id="status">
+        <span class="dot"></span><span class="status-label">Synced</span>
+      </button>
+      <button class="btn small" type="button" title="Pause all shortcuts - for games or remote desktop" data-id="pause"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"></path></svg><span>Pause</span></button>
+      <button class="icon-btn" type="button" data-i18n-title="trash" data-icon="trash" title="Trash" aria-label="Trash" data-id="open-trash"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M18 7l-.8 12.5a1.5 1.5 0 0 1-1.5 1.5H8.3a1.5 1.5 0 0 1-1.5-1.5L6 7M10 11v6M14 11v6"></path></svg></button>
+      <button class="icon-btn" type="button" data-i18n-title="settings" data-icon="settings" title="Settings" aria-label="Settings" data-id="open-settings"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"></path><circle cx="15" cy="6" r="2"></circle><circle cx="9" cy="12" r="2"></circle><circle cx="17" cy="18" r="2"></circle></svg></button>
+    </header>
+    <div class="banners" data-id="banners"></div>
+    <div class="body">
+      <aside class="sidebar">
+        <nav class="groups" data-i18n-aria="groups" aria-label="Groups" data-id="groups"><div class="group-item" aria-pressed="true"><button class="group-pick" type="button"><span class="ic"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2.5"></rect><path d="M7 10h.1M10.5 10h.1M14 10h.1M17 10h.1M8 14h8"></path></svg></span><span class="group-name">All shortcuts</span><span class="group-count">10</span></button></div><div class="group-item" aria-pressed="false"><button class="group-pick" type="button"><span class="swatch none"></span><span class="group-name">No group</span><span class="group-count">2</span></button></div><div class="group-item" aria-pressed="false"><button class="group-pick" type="button"><span class="swatch" data-color="#5550d8" style="--c: #5550d8;"></span><span class="group-name">Personal</span><span class="group-count">3</span></button><button class="icon-btn tiny" type="button" title="Edit group" aria-label="Edit group"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="1.3"></circle><circle cx="12" cy="12" r="1.3"></circle><circle cx="18" cy="12" r="1.3"></circle></svg></button></div><div class="group-item" aria-pressed="false"><button class="group-pick" type="button"><span class="swatch" data-color="#0e9f6e" style="--c: #0e9f6e;"></span><span class="group-name">Work</span><span class="group-count">3</span></button><button class="icon-btn tiny" type="button" title="Edit group" aria-label="Edit group"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="1.3"></circle><circle cx="12" cy="12" r="1.3"></circle><circle cx="18" cy="12" r="1.3"></circle></svg></button></div><div class="group-item" aria-pressed="false"><button class="group-pick" type="button"><span class="swatch" data-color="#d97706" style="--c: #d97706;"></span><span class="group-name">Links</span><span class="group-count">2</span></button><button class="icon-btn tiny" type="button" title="Edit group" aria-label="Edit group"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="1.3"></circle><circle cx="12" cy="12" r="1.3"></circle><circle cx="18" cy="12" r="1.3"></circle></svg></button></div></nav>
+        <button class="link add-group" type="button" data-i18n="newGroup" data-id="add-group">+ New group</button>
+        <div class="account-card" data-id="account-card"><button class="acc-row" type="button"><span class="avatar">D</span><span class="acc-text"><b dir="ltr">dana@example.com</b><small>Synced 2 minutes ago</small></span></button></div>
+      </aside>
+      <main class="main">
+        <div class="toolbar">
+          <div class="searchbar">
+            <span class="search-icon" data-icon="search"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg></span>
+            <input type="search" data-i18n-placeholder="searchPlaceholder" data-i18n-aria="search" autocomplete="off" spellcheck="false" placeholder="Search shortcuts…" aria-label="Search" data-id="search">
+          </div>
+          <button class="btn primary" type="button" data-id="new-shortcut"><span data-icon="plus"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span><span data-i18n="newShortcut">New shortcut</span></button>
+        </div>
+        <div class="list" data-i18n-aria="shortcuts" aria-label="Shortcuts" data-id="list"><div class="row" role="button" tabindex="0" aria-label="Right Shift + E - Email"><div class="row-trigger"><span class="combo" dir="ltr"><kbd class="cap"><small>Right</small><span>Shift</span></kbd><span class="plus">+</span><kbd class="cap key"><span>E</span></kbd></span></div><div class="row-main"><b><bdi>Email</bdi></b><small><span class="ic"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 11h14M5 16h9"></path></svg></span><span><bdi>dana.levi@example.com</bdi></span></small></div><div class="row-flags"></div><label class="toggle mini" title="Turn off"><input type="checkbox" checked="" aria-label="On"><span class="track"></span></label></div><div class="row" role="button" tabindex="0" aria-label="Right Shift + A - Home address"><div class="row-trigger"><span class="combo" dir="ltr"><kbd class="cap"><small>Right</small><span>Shift</span></kbd><span class="plus">+</span><kbd class="cap key"><span>A</span></kbd></span></div><div class="row-main"><b><bdi>Home address</bdi></b><small><span class="ic"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 11h14M5 16h9"></path></svg></span><span><bdi>12 Herzl Street, Tel Aviv</bdi></span></small></div><div class="row-flags"></div><label class="toggle mini" title="Turn off"><input type="checkbox" checked="" aria-label="On"><span class="track"></span></label></div><div class="row" role="button" tabindex="0" aria-label="Left Shift + P - Phone"><div class="row-trigger"><span class="combo" dir="ltr"><kbd class="cap"><small>Left</small><span>Shift</span></kbd><span class="plus">+</span><kbd class="cap key"><span>P</span></kbd></span></div><div class="row-main"><b><bdi>Phone</bdi></b><small><span class="ic"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 11h14M5 16h9"></path></svg></span><span><bdi>+972 50 000 0000</bdi></span></small></div><div class="row-flags"></div><label class="toggle mini" title="Turn off"><input type="checkbox" checked="" aria-label="On"><span class="track"></span></label></div><div class="row" role="button" tabindex="0" aria-label=";sig - Signature"><div class="row-trigger"><span class="combo" dir="ltr"><kbd class="cap abbr"><span>;sig</span></kbd></span></div><div class="row-main"><b><bdi>Signature</bdi></b><small><span class="ic"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 11h14M5 16h9"></path></svg></span><span><bdi>Best regards,</bdi></span></small></div><div class="row-flags"></div><label class="toggle mini" title="Turn off"><input type="checkbox" checked="" aria-label="On"><span class="track"></span></label></div><div class="row" role="button" tabindex="0" aria-label="Right Ctrl + 1 - Meeting reply"><div class="row-trigger"><span class="combo" dir="ltr"><kbd class="cap"><small>Right</small><span>Ctrl</span></kbd><span class="plus">+</span><kbd class="cap key"><span>1</span></kbd></span></div><div class="row-main"><b><bdi>Meeting reply</bdi></b><small><span class="ic"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 11h14M5 16h9"></path></svg></span><span><bdi>Thanks! {cursor} works for me.</bdi></span></small></div><div class="row-flags"></div><label class="toggle mini" title="Turn off"><input type="checkbox" checked="" aria-label="On"><span class="track"></span></label></div><div class="row" role="button" tabindex="0" aria-label="תודה - שלום, תודה על הפנייה. נחזור אליך בהקדם."><div class="row-trigger"><span class="combo" dir="ltr"><kbd class="cap abbr"><span>תודה</span></kbd></span></div><div class="row-main"><b><bdi>שלום, תודה על הפנייה. נחזור אליך בהקדם.</bdi></b><small><span class="ic"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 11h14M5 16h9"></path></svg></span><span><bdi>Types text</bdi></span></small></div><div class="row-flags"></div><label class="toggle mini" title="Turn off"><input type="checkbox" checked="" aria-label="On"><span class="track"></span></label></div><div class="row" role="button" tabindex="0" aria-label="Right Alt + C - Team calendar"><div class="row-trigger"><span class="combo" dir="ltr"><kbd class="cap"><small>Right</small><span>Alt</span></kbd><span class="plus">+</span><kbd class="cap key"><span>C</span></kbd></span></div><div class="row-main"><b><bdi>Team calendar</bdi></b><small><span class="ic"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"></path><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"></path></svg></span><span><bdi>https://calendar.example.com/team</bdi></span></small></div><div class="row-flags"></div><label class="toggle mini" title="Turn off"><input type="checkbox" checked="" aria-label="On"><span class="track"></span></label></div><div class="row" role="button" tabindex="0" aria-label="Right Shift + Right Alt + I - Invoices"><div class="row-trigger"><span class="combo" dir="ltr"><kbd class="cap"><small>Right</small><span>Shift</span></kbd><span class="plus">+</span><kbd class="cap"><small>Right</small><span>Alt</span></kbd><span class="plus">+</span><kbd class="cap key"><span>I</span></kbd></span></div><div class="row-main"><b><bdi>Invoices</bdi></b><small><span class="ic"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h4.2l2 2H19a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5z"></path></svg></span><span><bdi>C:\Users\Dana\Documents\Invoices</bdi></span></small></div><div class="row-flags"></div><label class="toggle mini" title="Turn off"><input type="checkbox" checked="" aria-label="On"><span class="track"></span></label></div><div class="row attention" role="button" tabindex="0" aria-label="Right Win + K - Calculator"><div class="row-trigger"><span class="combo" dir="ltr"><kbd class="cap"><small>Right</small><span>Win</span></kbd><span class="plus">+</span><kbd class="cap key"><span>K</span></kbd></span></div><div class="row-main"><b><bdi>Calculator</bdi></b><small><span class="ic"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"></rect><path d="M3.5 9h17M7 6.8h.1M9.5 6.8h.1"></path></svg></span><span><bdi>C:\Windows\System32\calc.exe</bdi></span></small></div><div class="row-flags"><span class="badge warn" title="Most PC keyboards have no Right Win key. Open it and choose &quot;Use it&quot; or &quot;Ignore&quot;.">Needs a choice</span></div><label class="toggle mini" title="Turn off"><input type="checkbox" checked="" aria-label="On"><span class="track"></span></label></div><div class="row inactive" role="button" tabindex="0" aria-label="Right Shift + D - Today"><div class="row-trigger"><span class="combo" dir="ltr"><kbd class="cap"><small>Right</small><span>Shift</span></kbd><span class="plus">+</span><kbd class="cap key"><span>D</span></kbd></span></div><div class="row-main"><b><bdi>Today</bdi></b><small><span class="ic"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 11h14M5 16h9"></path></svg></span><span><bdi>{date}</bdi></span></small></div><div class="row-flags"></div><label class="toggle mini" title="Turn on"><input type="checkbox" aria-label="On"><span class="track"></span></label></div></div>
+        <footer class="footer">
+          <span data-id="count">10 shortcuts · 9 on</span>
+          <span data-id="footer-hint"></span>
+        </footer>
+      </main>
+    </div>
+  </div>
+  <!-- the shortcut editor, a panel over the list -->
+  <div class="toast" role="status" aria-live="polite" data-id="toast"></div></div><!-- /ui --></div>
+  </div>
+
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // Text, classes and values change through tweens that state both sides, so any seek (back or forth,
+    // or a scene shown again) lands on the right state. "Empty" is a zero-width space, never "".
+    const ZW = "\u200b";
+    const swap = (sel, attr, from, to, t) =>
+      tl.fromTo(sel, { attr: { [attr]: from || ZW } }, { attr: { [attr]: to || ZW }, duration: 0.001, ease: "none", immediateRender: false }, t);
+    const SIG = "Best regards,\nDana Levi\nExample Ltd.";
+    // Scene time = film time - 28.0
+    const down = (sel, t) => tl.to(sel, { y: 7, borderBottomWidth: 1, duration: 0.067, ease: "power2.out" }, t);
+    const up = (sel, t) => tl.to(sel, { y: 0, borderBottomWidth: 7, duration: 0.1, ease: "power2.out" }, t);
+    const ROW = '#c-win [aria-label="Right Shift + E - Email"]';
+
+    gsap.set(["#c-keys-r", "#c-keys-l", "#c-win", "#c-e", "#c-about-caret"], { opacity: 0 });
+    gsap.set("#c-ring-path", { strokeDashoffset: 1 });
+    gsap.set("#c-email", { attr: { "data-text": ZW } });
+    gsap.set("#c-email-box", { attr: { class: "in focus" } });
+    gsap.set("#c-about-box", { attr: { class: "in tall" } });
+    gsap.set("#c-win", { scale: 1.6 });
+
+    // the page settles in (cut from the wordmark)
+    tl.fromTo("#c-browser", { scale: 1.04, filter: "blur(6px)" }, { scale: 1, filter: "blur(0px)", duration: 0.4, ease: "expo.out" }, 0);
+
+    // "Right Shift and E... there it is": the whole address lands at once
+    tl.fromTo("#c-keys-r", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.45, ease: "expo.out" }, 0.3);
+    down("#c-rshift", 0.6);
+    down("#c-re", 1.2);
+    swap("#c-email", "data-text", "", "dana.levi@example.com", 1.27);
+    tl.fromTo("#c-email-box", { scale: 1 }, { scale: 1.015, duration: 0.08, yoyo: true, repeat: 1, ease: "power2.out" }, 1.27);
+    up("#c-re", 1.4);
+    up("#c-rshift", 1.55);
+
+    // "Left Shift and E? Still just a capital E."
+    tl.to("#c-keys-r", { opacity: 0, y: -20, duration: 0.2, ease: "power3.in" }, 2.85);
+    tl.fromTo("#c-keys-l", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.45, ease: "expo.out" }, 3.05);
+    swap("#c-email-box", "class", "in focus", "in", 3.0);
+    tl.set("#c-email-caret", { opacity: 0 }, 3.0);
+    swap("#c-about-box", "class", "in tall", "in tall focus", 3.0);
+    tl.set("#c-about-caret", { opacity: 1 }, 3.0);
+    down("#c-lshift", 3.5);
+    down("#c-le", 4.05);
+    tl.set("#c-e", { opacity: 1 }, 4.12);
+    up("#c-le", 4.3);
+    up("#c-lshift", 4.45);
+    tl.to("#c-ring-path", { strokeDashoffset: 0, duration: 0.45, ease: "power2.inOut" }, 5.55);
+
+    // "Left and right are different keys": the real KeyBridge window, the Email shortcut's keys
+    tl.to("#c-world", { opacity: 0, filter: "blur(12px)", duration: 0.25, ease: "power3.in" }, 7.0);
+    tl.fromTo("#c-win", { opacity: 0, scale: 1.68, filter: "blur(8px)" }, { opacity: 1, scale: 1.6, filter: "blur(0px)", duration: 0.45, ease: "expo.out" }, 7.12);
+    tl.to(`${ROW} .cap`, { boxShadow: "0 0 0 3px #5550d8", backgroundColor: "#ebebfd", duration: 0.25, ease: "power2.out", stagger: 0.12 }, 7.95);
+    tl.to(ROW, { backgroundColor: "#ffffff", boxShadow: "0 6px 20px rgba(85, 80, 216, 0.18)", duration: 0.3, ease: "power2.out" }, 7.95);
+
+    window.__timelines["core"] = tl;
+  </script>
+</template>

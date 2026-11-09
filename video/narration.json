@@ -1,0 +1,63 @@
+{
+  "voice_id": "JBFqnCBsd6RMkjVDRZzb",
+  "voice_name": "George - Warm, Captivating Storyteller",
+  "model_id": "eleven_v3",
+  "seed": 1207,
+  "voice_settings": {
+    "stability": 0.5,
+    "similarity_boost": 0.8,
+    "style": 0.35,
+    "use_speaker_boost": true
+  },
+  "joiner": "\n\n",
+  "lines": [
+    {
+      "id": "hook",
+      "text": "Two computers. One desk. A Mac... and a PC."
+    },
+    {
+      "id": "stuck",
+      "text": "And one email address you type twenty times a day. Letter... by letter."
+    },
+    {
+      "id": "detours",
+      "text": "[sighs] So you keep it in a note, and copy it from there. Type it again... one letter wrong. And on a new computer? You start all over."
+    },
+    {
+      "id": "whatif",
+      "text": "What if one key could just... type it for you? On every computer?"
+    },
+    {
+      "id": "reveal",
+      "text": "This is KeyBridge."
+    },
+    {
+      "id": "core",
+      "text": "Right Shift and E... there it is. Left Shift and E? Still just a capital E. Left and right are different keys."
+    },
+    {
+      "id": "signin",
+      "text": "On your Mac, sign in and type your code once. Every shortcut is there. The only rule: sign in on each computer."
+    },
+    {
+      "id": "depth",
+      "text": "Type a short word for your whole signature. Open a link, a folder or a program with one key. And nothing you delete is ever lost."
+    },
+    {
+      "id": "privacy",
+      "text": "Your shortcuts are locked with a code only you have, before they leave your computer, so nobody else can read them. And KeyBridge never records what you type."
+    },
+    {
+      "id": "languages",
+      "text": "In English, Hebrew, Spanish, French, Russian, or Arabic."
+    },
+    {
+      "id": "payoff",
+      "text": "So stop typing the same things over and over. Just press it... once."
+    },
+    {
+      "id": "end",
+      "text": "KeyBridge. Free and open source, for Mac and Windows."
+    }
+  ]
+}

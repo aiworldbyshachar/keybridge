@@ -1,0 +1,73 @@
+<template>
+  <link rel="stylesheet" href="assets/ui.css">
+  <style>
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI"); font-weight: 400; }
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI Semibold"); font-weight: 600; }
+    @font-face { font-family: "CB Sans"; src: local("Segoe UI Bold"); font-weight: 700; }
+    @font-face { font-family: "CB Mono"; src: local("Consolas"); font-weight: 400; }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #f5f5f8; }
+    #e-arch { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+    #e-icon { position: absolute; left: 0; top: 0; width: 180px; height: 180px; }
+    #e-word { position: absolute; left: 747px; top: 312px; height: 173px; font-size: 140px; line-height: 1; white-space: nowrap; }
+    #e-tag { position: absolute; left: 0; right: 0; top: 540px; text-align: center; font: 600 46px "CB Sans"; color: #676778; }
+    #e-tag span { display: inline-block; }
+    #e-line { position: absolute; left: 0; right: 0; top: 640px; display: flex; justify-content: center; align-items: center; gap: 26px; font: 600 38px "CB Sans"; color: #191923; }
+    #e-line .p { display: inline-flex; align-items: center; gap: 12px; }
+    #e-line svg { width: 40px; height: 40px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+    #e-line .dot { color: #7a7a88; }
+    #e-cta { position: absolute; left: 0; right: 0; top: 770px; display: flex; justify-content: center; align-items: center; gap: 30px; }
+    #e-btn { display: inline-flex; align-items: center; gap: 14px; height: 84px; padding: 0 38px; border-radius: 16px; background: #5550d8; color: #fff; font: 700 36px "CB Sans"; }
+    #e-btn svg { width: 34px; height: 34px; fill: none; stroke: #fff; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+    #e-url { font: 400 36px "CB Mono", monospace; color: #191923; }
+    #e-cursor { width: 44px; height: 64px; }
+  </style>
+
+  <div id="root" data-composition-id="endcard" data-width="1920" data-height="1080">
+    <svg id="e-arch" viewBox="0 0 1920 1080"><path id="e-arch-path" d="M 700 560 A 265 265 0 1 1 1230 560" pathLength="1" fill="none" stroke="#5550d8" stroke-width="12" stroke-linecap="round" stroke-dasharray="1 1" /></svg>
+    <img id="e-icon" src="assets/img/icon-1024.png" alt="">
+    <div id="e-word" class="display">KeyBridge</div>
+    <div id="e-tag"><span>Press</span> <span>it</span> <span>once.</span> <span>It's</span> <span>typed.</span></div>
+    <div id="e-line">
+      <span id="e-free">Free &amp; open source</span><span class="dot" id="e-dot">·</span>
+      <span class="p" id="e-mac"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="1.5" /><path d="M2 19.5h20" /></svg>Mac</span>
+      <span class="p" id="e-win"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5" /><path d="M8.5 20h7M12 16v4" /></svg>Windows</span>
+    </div>
+    <div id="e-cta">
+      <span id="e-btn"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" /></svg>Download free</span>
+      <span id="e-url" data-var-text="repo-url">github.com/aiworldbyshachar/keybridge</span>
+    </div>
+    <svg id="e-cursor" class="cursor" viewBox="0 0 22 32"><path d="M2 2 L2 26 L8 20 L12 30 L16 28 L12 18.5 L20 18.5 Z" fill="#111" stroke="#fff" stroke-width="2" stroke-linejoin="round" /></svg>
+  </div>
+
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // Scene time = film time - 76.1
+    gsap.set(["#e-word", "#e-tag span", "#e-free", "#e-dot", "#e-mac", "#e-win", "#e-cta"], { opacity: 0 });
+    gsap.set("#e-icon", { x: 966 - 90, y: 295 - 90, scale: 0 });
+    gsap.set("#e-arch-path", { strokeDashoffset: 1 });
+    gsap.set("#e-cursor", { x: 1500, y: 1120 });
+
+    // the bridge draws on the quiet ground (the reply has just been sent)
+    tl.fromTo("#e-arch-path", { strokeDashoffset: 0.85 }, { strokeDashoffset: 0, duration: 0.6, ease: "power2.out" }, 0);
+
+    // "KeyBridge": the bridge folds into the mark, the name wipes in
+    tl.fromTo("#e-arch", { scale: 1, opacity: 1, transformOrigin: "966px 295px" }, { scale: 0, opacity: 0, duration: 0.4, ease: "power3.in" }, 1.21);
+    tl.to("#e-icon", { scale: 0.55, duration: 0.25, ease: "expo.out" }, 1.31);
+    tl.to("#e-icon", { x: 537, y: 312 - 20, scale: 1, duration: 0.45, ease: "power2.inOut" }, 1.56);
+    tl.fromTo("#e-word", { opacity: 1, clipPath: "inset(0% 100% 0% 0%)" }, { opacity: 1, clipPath: "inset(0% 0% 0% 0%)", duration: 0.5, ease: "expo.out" }, 1.95);
+
+    // "Free and open source, for Mac and Windows"
+    tl.fromTo("#e-tag span", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.15, stagger: 0.07 }, 2.2);
+    tl.fromTo("#e-free", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18 }, 2.54);
+    tl.to("#e-dot", { opacity: 1, duration: 0.2 }, 3.4);
+    tl.fromTo("#e-mac", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.3, ease: "expo.out" }, 3.76);
+    tl.fromTo("#e-win", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.3, ease: "expo.out" }, 4.16);
+
+    // the call to action, held to the end
+    tl.fromTo("#e-cta", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" }, 4.8);
+    tl.to("#e-cursor", { x: 600, y: 830, duration: 0.7, ease: "expo.out" }, 5.5);
+    tl.to("#e-btn", { scale: 0.96, duration: 0.07, yoyo: true, repeat: 1 }, 6.3);
+    tl.to("#e-btn", { backgroundColor: "#4440c2", duration: 0.1 }, 6.32);
+    window.__timelines["endcard"] = tl;
+  </script>
+</template>
