@@ -1,6 +1,6 @@
 'use strict';
 // A stand-in for the Supabase project, over real HTTP on localhost: the auth endpoints KeyBridge uses
-// (email link with PKCE, tokens, renewal, sign-out) and the REST calls for the tables and functions
+// (email link with PKCE or its 6-digit code, tokens, renewal, sign-out) and the REST calls for the tables and functions
 // in supabase/migrations, with the rows kept by FakeCloud. "Emails" land in `mail` instead.
 const http = require('http');
 const crypto = require('crypto');
@@ -20,7 +20,8 @@ class FakeSupabase {
     this.tokens = new Map(); // access token -> { userId, sessionId, exp }
     this.refreshTokens = new Map(); // refresh token -> session id
     this.pending = new Map(); // auth code -> { email, challenge }
-    this.mail = []; // { email, code, redirectTo }
+    this.mail = []; // { email, code, token, redirectTo } - code for the link, token = the 6 digits
+    this.otps = new Map(); // email -> the 6 digits of its latest email
     this.calls = [];
     this.tokenLife = 3600;
   }
@@ -72,8 +73,18 @@ class FakeSupabase {
       if (!this.users.has(email)) this.users.set(email, crypto.randomUUID());
       const code = crypto.randomUUID();
       this.pending.set(code, { email, challenge: json.code_challenge, method: json.code_challenge_method });
-      this.mail.push({ email, code, redirectTo: url.searchParams.get('redirect_to') });
+      const token = String(crypto.randomInt(0, 1e6)).padStart(6, '0');
+      this.otps.set(email, token);
+      this.mail.push({ email, code, token, redirectTo: url.searchParams.get('redirect_to') });
       return send(200, {});
+    }
+    if (p === '/auth/v1/verify' && req.method === 'POST') {
+      const email = String(json.email || '').toLowerCase();
+      if (json.type !== 'email' || !json.token || this.otps.get(email) !== json.token) return send(403, { error_code: 'otp_expired', msg: 'Token has expired or is invalid' });
+      this.otps.delete(email); // used once
+      const sessionId = crypto.randomUUID();
+      this.sessions.set(sessionId, { userId: this.users.get(email), revoked: false });
+      return send(200, this._issue(this.users.get(email), sessionId));
     }
     if (p === '/auth/v1/token' && url.searchParams.get('grant_type') === 'pkce') {
       const pend = this.pending.get(json.auth_code);

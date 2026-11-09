@@ -1120,6 +1120,20 @@ textarea:focus {
   user-select: none;
 }
 
+/* the 6-digit code from the sign-in email */
+.otp-form {
+  max-width: 300px;
+  margin: 4px auto 6px;
+  text-align: start;
+}
+
+.field-row input.otp-input {
+  height: 38px;
+  font: 600 18px/1 var(--mono);
+  letter-spacing: 0.3em;
+  text-align: center;
+}
+
 .code-input {
   font-family: var(--mono) !important;
   letter-spacing: 0.06em;

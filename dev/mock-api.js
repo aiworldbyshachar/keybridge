@@ -43,6 +43,7 @@
   const settings = { language: params.get('lang') || 'en', openAtLogin: true, paused: state === 'paused', onboarded: state !== 'first-run', deviceName: mac ? 'Dana’s MacBook' : 'DANA-PC' };
   const accountStates = { ready: 'ready', offline: 'ready', 'signed-out': 'signed-out', waiting: 'waiting-for-link', code: 'needs-code', local: 'unconfigured' };
   const account = { state: accountStates[accountMode] || 'ready', email: 'dana@example.com', lastSync: now - 2 * min, offline: accountMode === 'offline', hasCode: true };
+  let pendingSignIn = null; // resolves the waiting sign-in: true = the email's code, false = cancelled
   if (account.state === 'signed-out') account.email = '';
 
   // the same rules as src/main/triggers.js, enough for the preview
@@ -170,17 +171,31 @@
       emit('state:changed');
       return { ok: true };
     },
+    // waits for the email's code: 123456 signs in, anything else is "wrong"
     signIn: async () => {
       account.state = 'waiting-for-link';
       account.email = 'dana@example.com';
       emit('state:changed');
-      await new Promise((r) => setTimeout(r, 2500));
+      const came = await new Promise((r) => {
+        pendingSignIn = r;
+      });
+      pendingSignIn = null;
+      if (!came) return { ok: false, error: 'cancelled' };
       account.state = 'ready';
       emit('state:changed');
       emit('account:code', 'K7QM-4XRT-P9WE');
       return { ok: true };
     },
+    enterEmailCode: async (code) => {
+      await new Promise((r) => setTimeout(r, 300));
+      const digits = String(code).replace(/\D/g, '');
+      if (digits.length !== 6) return { ok: false, error: 'bad-email-code' };
+      if (digits !== '123456') return { ok: false, error: 'wrong-email-code' };
+      if (pendingSignIn) pendingSignIn(true);
+      return { ok: true };
+    },
     cancelSignIn: async () => {
+      if (pendingSignIn) pendingSignIn(false);
       account.state = 'signed-out';
       emit('state:changed');
     },

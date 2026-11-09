@@ -23,6 +23,7 @@ contextBridge.exposeInMainWorld('api', {
   exportJson: () => ipcRenderer.invoke('export:json'),
   setSettings: (patch) => ipcRenderer.invoke('settings:set', patch),
   signIn: (email) => ipcRenderer.invoke('account:signin', email),
+  enterEmailCode: (code) => ipcRenderer.invoke('account:email-code', code),
   cancelSignIn: () => ipcRenderer.invoke('account:cancel'),
   enterCode: (code) => ipcRenderer.invoke('account:code', code),
   showCode: () => ipcRenderer.invoke('account:show-code'),

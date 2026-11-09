@@ -761,11 +761,39 @@
       return;
     }
     if (a.state === 'waiting-for-link') {
+      // the 6-digit code from the email (read on any device), or its link opened on this computer
+      const code = h('input', { id: 'email-code', class: 'otp-input', dir: 'ltr', inputmode: 'numeric', autocomplete: 'one-time-code', spellcheck: 'false', placeholder: '······', 'aria-label': t('accEmailCode') });
+      const go = h('button', { class: 'btn primary', type: 'submit' }, t('signIn'));
+      const msg = h('p', { class: 'msg', hidden: true });
+      const submit = async () => {
+        if (go.disabled) return;
+        go.disabled = true;
+        msg.hidden = true;
+        const res = await api.enterEmailCode(code.value);
+        go.disabled = false;
+        if (!res.ok) {
+          msg.hidden = false;
+          msg.className = 'msg error';
+          msg.textContent = errorText(res.error);
+          code.select();
+        }
+      };
+      code.addEventListener('input', () => {
+        const digits = code.value.replace(/\D/g, '').slice(0, 6);
+        if (code.value !== digits) code.value = digits;
+        if (digits.length === 6) submit();
+      });
       body.append(h('section', { class: 'group center' },
         h('div', { class: 'big-icon' }, icon('mail')),
         h('h3', null, t('accCheckEmail')),
         h('p', { class: 'help' }, t('accCheckEmailBody', { email: a.email })),
+        h('form', { class: 'otp-form', onsubmit: (e) => {
+          e.preventDefault();
+          submit();
+        } }, h('div', { class: 'field-row' }, code, go), msg),
+        h('p', { class: 'help' }, t('accNoEmail')),
         h('button', { class: 'btn', type: 'button', onclick: () => api.cancelSignIn() }, t('cancel'))));
+      setTimeout(() => code.focus(), 30);
       return;
     }
     if (a.state === 'needs-code') {

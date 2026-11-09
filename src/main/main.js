@@ -471,6 +471,16 @@ function setupIpc() {
       return fail(err);
     }
   });
+  ipcMain.handle('account:email-code', async (_e, code) => {
+    try {
+      await account.enterEmailCode(code);
+      return { ok: true };
+    } catch (err) {
+      // the reason only, never the code
+      log(`sign-in code refused: ${err.code || 'error'}${err.status ? ` ${err.status}` : ''}`);
+      return fail(err);
+    }
+  });
   ipcMain.handle('account:cancel', () => account.cancelSignIn());
   ipcMain.handle('account:code', async (_e, code) => {
     try {

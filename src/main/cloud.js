@@ -1,10 +1,13 @@
 'use strict';
-// The Supabase project: sign-in by email link, and the account's rows (supabase/migrations).
+// The Supabase project: sign-in by email (a 6-digit code or a link), and the account's rows
+// (supabase/migrations).
 // Plain HTTPS requests - no Supabase library, the family keeps to what Node and Electron bring.
 //
 // Sign-in uses PKCE: this computer makes a secret (the verifier) and sends only its hash with the
 // email request; the link in the email comes back to http://localhost:47822/auth?code=..., and the
 // code is worth something only together with the verifier, which never left this computer.
+// The same email holds a 6-digit code (supabase/templates) for when it's read on another device:
+// typed into KeyBridge it gives a session directly.
 const crypto = require('crypto');
 const { EventEmitter } = require('events');
 
@@ -101,6 +104,14 @@ class Cloud extends EventEmitter {
   // The code from the link + the verifier -> a session.
   async finishSignIn(code, verifier) {
     const session = await this._fetch('/auth/v1/token?grant_type=pkce', { method: 'POST', auth: false, body: { auth_code: code, code_verifier: verifier } });
+    this._setSession(session);
+    return this.session;
+  }
+
+  // The 6-digit code from the same email -> a session. Works for a new account (its first email)
+  // and a returning one alike ("email" covers both).
+  async verifyEmailCode(email, token) {
+    const session = await this._fetch('/auth/v1/verify', { method: 'POST', auth: false, body: { type: 'email', email: String(email).trim(), token: String(token) } });
     this._setSession(session);
     return this.session;
   }

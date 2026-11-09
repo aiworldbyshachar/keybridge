@@ -43,8 +43,8 @@ The apps aren't signed with paid Apple/Microsoft developer certificates - that's
 
 ## Use your shortcuts on more computers
 
-1. On your first computer, click **Sign in** at the bottom left of the KeyBridge window, type your email and click **Send link**.
-2. Open the email **on that same computer** and click the link. KeyBridge shows your code, like `K7QM-4XRT-P9WE`. Write it down.
+1. On your first computer, click **Sign in** at the bottom left of the KeyBridge window, type your email and click **Send code**.
+2. Type the 6-digit code from the email - you can read it on your phone or any other device - or click the email's link on that same computer. KeyBridge then shows your code, like `K7QM-4XRT-P9WE`. Write it down.
 3. On every other computer: install KeyBridge, sign in the same way, and type the code once. Your shortcuts appear, and from then on changes reach every computer within seconds.
 
 Lost the code? Any computer that's still signed in shows it again under **Account → Show my code**.
@@ -70,7 +70,7 @@ In the cloud, while you're signed in: your email address, your shortcuts, groups
 
 - **A shortcut doesn't fire in one app.** On Windows, apps run as administrator (like Task Manager) are kept apart from normal apps, so shortcuts don't reach them. On the Mac, password fields block every app that watches the keyboard - that's on purpose.
 - **Nothing fires on the Mac.** System Settings → Privacy & Security → Accessibility → KeyBridge must be on. After installing a new version, if shortcuts stop, remove KeyBridge from that list and add it again.
-- **The sign-in link doesn't finish signing in.** Open it on the computer you're signing in on - KeyBridge waits for it there. "Too many tries" means wait a few minutes.
+- **The sign-in email doesn't come, or its code doesn't work.** Look in spam. The code works once, for an hour - click Cancel and send a new one. The link in the email only works on the computer you're signing in on; the code works from anywhere. "Too many tries" means wait a few minutes.
 - **An antivirus program complains.** Any app that watches for hotkeys can look suspicious to them. KeyBridge's code is all here; it sends out nothing but your locked shortcuts, and only when you're signed in.
 - **Something else?** Settings → Open data folder → `keybridge.log` (it never contains what you type or what your shortcuts say), and [open an issue](https://github.com/aiworldbyshachar/keybridge/issues).
 
@@ -81,7 +81,7 @@ In the cloud, while you're signed in: your email address, your shortcuts, groups
 - `src/main/store.js` keeps shortcuts, groups and the 30-day trash in `shortcuts.json`.
 - `src/main/vault.js` locks everything that goes to the cloud: key = `scrypt(code, 'keybridge/v1', 32)`, AES-256-GCM. The server sees only ids, revision numbers, sizes, deleted flags, device ids and times.
 - `src/main/sync.js`, `cloud.js` and `realtime.js` sync with a Supabase project (Postgres with row-level security; the tables and functions are in [`supabase/migrations`](supabase/migrations)) over plain HTTPS, no Supabase library. The later change wins and the other goes to the trash; an edit always beats a delete.
-- `src/main/signin.js` catches the email link on `localhost:47822` (PKCE: the link is worth nothing without a secret that never leaves the computer). `clavier.js` reads Clavier+'s settings file. `main.js` is the tray, window and IPC; the UI is in `src/renderer`, all strings in all languages in `src/shared/i18n.js`.
+- `src/main/signin.js` catches the email link on `localhost:47822` (PKCE: the link is worth nothing without a secret that never leaves the computer); the 6-digit code in the same email signs in from any device (`cloud.js`, `verifyEmailCode`). `clavier.js` reads Clavier+'s settings file. `main.js` is the tray, window and IPC; the UI is in `src/renderer`, all strings in all languages in `src/shared/i18n.js`.
 
 ## Build from source
 
@@ -94,7 +94,7 @@ npm run dist:win     # Windows installer → dist/
 npm run dist:mac     # macOS DMG → dist/ (on a Mac)
 ```
 
-Without a cloud set up, KeyBridge runs on one computer only. To sync through your own Supabase project, run `supabase/migrations/0001_init.sql` in it, allow `http://localhost:47822/auth` as a redirect URL, and put `KEYBRIDGE_SUPABASE_URL` and `KEYBRIDGE_SUPABASE_KEY` (the publishable key, never the secret one) in a `.env` file - it's gitignored. The installers need both values.
+Without a cloud set up, KeyBridge runs on one computer only. To sync through your own Supabase project, run `supabase/migrations/0001_init.sql` in it, allow `http://localhost:47822/auth` as a redirect URL, set up your own email sender (Authentication → Emails → SMTP Settings) and paste [`supabase/templates/sign-in.html`](supabase/templates/sign-in.html) into both the **Confirm signup** and **Magic Link** templates, and put `KEYBRIDGE_SUPABASE_URL` and `KEYBRIDGE_SUPABASE_KEY` (the publishable key, never the secret one) in a `.env` file - it's gitignored. The installers need both values.
 
 `node dev/serve.js` previews the window in a browser with made-up shortcuts, `npm run demo` runs the keyboard engine in a terminal, and `node dev/site-shots.js` takes the website's pictures from the real window. Releases are built by GitHub Actions: pushing a tag like `v1.0.0` builds both installers and publishes them (`.github/workflows/release.yml`).
 

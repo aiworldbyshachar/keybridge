@@ -182,6 +182,43 @@ test('deleting the account ends it on every computer, the shortcuts stay', async
   assert.deepStrictEqual([pc.store.shortcuts().length, mac.store.shortcuts().length], [1, 1]);
 });
 
+test('the 6-digit code from the email signs in too (the email read on a phone); a wrong one can be retyped', async (t) => {
+  const { server, computer, signIn, cleanup } = await setup();
+  t.after(cleanup);
+  const pc = computer('pc');
+  const { code } = await signIn(pc);
+  const mac = computer('mac');
+  const before = server.mail.length;
+  const done = mac.account.signIn('Me@Example.com ');
+  while (server.mail.length === before) await new Promise((r) => setTimeout(r, 5));
+  const mail = server.mail.at(-1);
+  assert.match(mail.token, /^\d{6}$/);
+  assert.strictEqual(mac.account.state, 'waiting-for-link');
+  // a code of the wrong shape is refused here, a wrong one by the server; it keeps waiting either way
+  await assert.rejects(mac.account.enterEmailCode('12345'), (e) => e.code === 'bad-email-code');
+  const wrong = mail.token === '000000' ? '111111' : '000000';
+  await assert.rejects(mac.account.enterEmailCode(wrong), (e) => e.code === 'wrong-email-code');
+  assert.strictEqual(mac.account.state, 'waiting-for-link');
+  // typed or pasted with a space in the middle still works
+  await mac.account.enterEmailCode(`${mail.token.slice(0, 3)} ${mail.token.slice(3)}`);
+  await done;
+  assert.strictEqual(mac.account.state, 'needs-code', 'the same account: it asks for the account code next');
+  await mac.account.enterCode(code);
+  assert.strictEqual(mac.account.state, 'ready');
+  // the link's server stopped waiting, so the port is free again
+  (await waitForLink({ port: mac.port })).close();
+  // and the code can't be used twice
+  const again = computer('third');
+  const before2 = server.mail.length;
+  const done2 = again.account.signIn('me@example.com');
+  while (server.mail.length === before2) await new Promise((r) => setTimeout(r, 5));
+  await assert.rejects(again.account.enterEmailCode(mail.token), (e) => e.code === 'wrong-email-code');
+  again.account.cancelSignIn();
+  await assert.rejects(done2, /cancelled/);
+  assert.strictEqual(again.account.state, 'signed-out');
+  await assert.rejects(again.account.enterEmailCode(server.mail.at(-1).token), (e) => e.code === 'not-asking');
+});
+
 test('the sign-in link: a used or expired one says so; the port can only wait for one', async () => {
   const port = nextPort++;
   const link = await waitForLink({ port });

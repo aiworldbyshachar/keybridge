@@ -1,7 +1,8 @@
 'use strict';
 // Being signed in on this computer: the session, the account code, the sync and when it runs.
 //
-//   signed-out --signIn(email)--> waiting-for-link --link opened-->
+//   signed-out --signIn(email)--> waiting-for-link --the email's 6-digit code typed (enterEmailCode),
+//                                                     or its link opened on this computer-->
 //     the account's first computer: a new code is made and shown once (event 'code') --> ready
 //     the account already has a code: needs-code --enterCode(code)--> ready
 //   ready: syncs now, a moment after each change here, when the cloud nudges, and every few
@@ -84,7 +85,8 @@ class Account extends EventEmitter {
     }
   }
 
-  // Sends the email and waits for its link to be opened on this computer.
+  // Sends the email and waits for whichever comes first: its code typed here (enterEmailCode), or its
+  // link opened on this computer.
   async signIn(email) {
     if (this.state === 'unconfigured') throw new AccountError('not-configured');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim())) throw new AccountError('bad-email');
@@ -100,15 +102,38 @@ class Account extends EventEmitter {
     this.pendingEmail = String(email).trim();
     this._setState('waiting-for-link');
     try {
-      await this.cloud.finishSignIn(await link.code, verifier);
+      const came = await new Promise((resolve, reject) => {
+        this.pendingTyped = () => resolve({ typed: true });
+        link.code.then((code) => resolve({ code }), reject);
+      });
+      if (came.code) await this.cloud.finishSignIn(came.code, verifier);
     } catch (err) {
       this._setState('signed-out');
       throw err;
     } finally {
       this.pendingLink = null;
       this.pendingEmail = '';
+      this.pendingTyped = null;
     }
     await this._afterSignIn();
+  }
+
+  // The 6-digit code from the sign-in email. A wrong one leaves the sign-in waiting, to try again.
+  async enterEmailCode(code) {
+    if (this.state !== 'waiting-for-link' || !this.pendingTyped) throw new AccountError('not-asking');
+    const digits = String(code).replace(/\D/g, '');
+    if (!/^\d{6}$/.test(digits)) throw new AccountError('bad-email-code');
+    try {
+      await this.cloud.verifyEmailCode(this.pendingEmail, digits);
+    } catch (err) {
+      // Supabase answers a wrong or used-up code with 403 otp_expired
+      if ([400, 401, 403, 404, 422].includes(err.status)) throw new AccountError('wrong-email-code');
+      throw err;
+    }
+    const done = this.pendingTyped;
+    const link = this.pendingLink;
+    done(); // first, so closing the link's server below can't end the sign-in
+    if (link) link.close();
   }
 
   cancelSignIn() {
