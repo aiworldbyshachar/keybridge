@@ -96,7 +96,7 @@ npm run dist:mac     # macOS DMG → dist/ (on a Mac)
 
 Without a cloud set up, KeyBridge runs on one computer only. To sync through your own Supabase project, run `supabase/migrations/0001_init.sql` in it, allow `http://localhost:47822/auth` as a redirect URL, set up your own email sender (Authentication → Emails → SMTP Settings) and paste [`supabase/templates/sign-in.html`](supabase/templates/sign-in.html) into both the **Confirm signup** and **Magic Link** templates, and put `KEYBRIDGE_SUPABASE_URL` and `KEYBRIDGE_SUPABASE_KEY` (the publishable key, never the secret one) in a `.env` file - it's gitignored. The installers need both values.
 
-`node dev/serve.js` previews the window in a browser with made-up shortcuts, `npm run demo` runs the keyboard engine in a terminal, and `node dev/site-shots.js` takes the website's pictures from the real window. Releases are built by GitHub Actions: pushing a tag like `v1.0.0` builds both installers and publishes them (`.github/workflows/release.yml`).
+`node dev/serve.js` previews the window in a browser with made-up shortcuts, `npm run demo` runs the keyboard engine in a terminal, and `node dev/site-shots.js` takes the website's pictures from the real window. Releases are built by GitHub Actions: pushing a tag like `v1.1.3` builds both installers and publishes them (`.github/workflows/release.yml`).
 
 ## Contributing
 

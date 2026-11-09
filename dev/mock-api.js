@@ -78,7 +78,7 @@
     platform,
     getState: async () => ({
       platform: mac ? 'mac' : 'win',
-      version: '0.1.0',
+      version: '1.1.3',
       settings: { ...settings },
       shortcuts: structuredClone(shortcuts),
       groups: structuredClone(groups),

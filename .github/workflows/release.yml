@@ -1,6 +1,6 @@
 name: Release
 
-# Push a tag like v1.0.0 to build the Windows installer and the Mac app and publish them as a
+# Push a tag like v1.1.3 to build the Windows installer and the Mac app and publish them as a
 # GitHub release (the landing page links to the latest one). Run it by hand (Actions -> Release ->
 # Run workflow) for a test build: the installers are attached to the run and nothing is published.
 #
