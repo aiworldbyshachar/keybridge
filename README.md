@@ -6,7 +6,8 @@
 Free, open-source text shortcuts and hotkeys for Mac and Windows - with left and right Shift, Ctrl, Alt and Win / Cmd as different keys, and your shortcuts on each computer you sign in to, locked so only you can read them.</p>
 
 <p align="center">
-  <a href="https://aiworldbyshachar.github.io/keybridge/">Website &amp; demo video</a> ·
+  <a href="https://aiworldbyshachar.github.io/keybridge/">Website</a> ·
+  <a href="https://youtu.be/kn5N2qqknjU">Demo video on YouTube</a> ·
   <a href="https://github.com/aiworldbyshachar/keybridge/releases/latest/download/KeyBridge-Windows-Setup.exe">Download for Windows</a> ·
   <a href="https://github.com/aiworldbyshachar/keybridge/releases/latest/download/KeyBridge-macOS.dmg">Download for Mac</a> ·
   <a href="README.he.md">עברית</a>
