@@ -6,7 +6,6 @@ name: Release
 #
 # The installed app signs in through the Supabase project in the repository secrets
 # KEYBRIDGE_SUPABASE_URL and KEYBRIDGE_SUPABASE_KEY (the publishable key, never the secret one).
-# While the repo is private the macOS job may never get a runner (see helper.yml).
 on:
   push:
     tags: ["v*"]

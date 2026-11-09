@@ -28,10 +28,6 @@ jobs:
           if-no-files-found: error
 
   mac:
-    # On this private repo the macOS job never got a runner (three tries, Apple Silicon and Intel),
-    # so for now it runs only when started by hand (Actions > Helper > Run workflow) and the Mac
-    # helper is built on the MacBook with dev/mac-spike.sh. Drop this `if` once the repo is public.
-    if: github.event_name == 'workflow_dispatch'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4

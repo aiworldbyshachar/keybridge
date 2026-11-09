@@ -10,9 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # macOS runners don't start on this private repo yet (see helper.yml): add macos-latest
-        # back once the repo is public.
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
